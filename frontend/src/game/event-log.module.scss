@@ -1,0 +1,44 @@
+// Latest first, threaded on a single line so the eye follows the game backwards.
+.timeline {
+  max-height: 18rem;
+  margin: 0;
+  padding: 0 var(--space-1) 0 0;
+  overflow-y: auto;
+  list-style: none;
+  font-size: 0.8125rem;
+
+  li {
+    position: relative;
+    padding: var(--space-1) 0 var(--space-1) var(--space-5);
+
+    &::before {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0.4rem;
+      width: 2px;
+      background: var(--line);
+      content: '';
+    }
+
+    &::after {
+      position: absolute;
+      top: 0.7rem;
+      left: 0.2rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: var(--ink-soft);
+      content: '';
+    }
+
+    &:first-child {
+      font-weight: 700;
+
+      &::after {
+        background: var(--brass);
+        box-shadow: 0 0 0 3px var(--brass-light);
+      }
+    }
+  }
+}
