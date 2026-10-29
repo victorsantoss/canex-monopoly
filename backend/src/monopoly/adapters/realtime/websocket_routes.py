@@ -7,6 +7,7 @@ from monopoly.adapters.realtime.websocket_hub import WebSocketHub
 SnapshotProvider = Callable[[str], Awaitable[Mapping[str, object] | None]]
 
 UNKNOWN_GAME_CLOSE_CODE = 4404
+TOO_MANY_CONNECTIONS_CLOSE_CODE = 4429
 
 
 def create_websocket_router(hub: WebSocketHub, snapshot_provider: SnapshotProvider) -> APIRouter:
@@ -16,7 +17,9 @@ def create_websocket_router(hub: WebSocketHub, snapshot_provider: SnapshotProvid
     async def game_updates(websocket: WebSocket, code: str) -> None:
         # Register before reading the snapshot so no update slips in between; accept before closing,
         # or browsers see a failed handshake instead of the 4404 code.
-        await hub.connect(code, websocket)
+        if not await hub.connect(code, websocket):
+            await websocket.close(code=TOO_MANY_CONNECTIONS_CLOSE_CODE)
+            return
         try:
             snapshot = await snapshot_provider(code)
             if snapshot is None:
