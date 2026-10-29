@@ -28,6 +28,10 @@ npm ci
 npm run dev
 ```
 
+The frontend and the API must share an origin: in development the Vite proxy does it; a
+production build (`npm run build`) has to be served behind a reverse proxy that routes `/api` and
+`/ws` to the backend.
+
 **Play:** open http://localhost:5173, create a game, then open the invite link in other browsers
 (or other tabs: each tab is a separate player, see [ADR 4](docs/adr/0004-player-identity-with-secret-token.md)).
 

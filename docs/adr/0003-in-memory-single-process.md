@@ -18,3 +18,6 @@ The exercise is time-boxed to two hours and does not require games to survive a 
 - Scaling out means a shared store (e.g. PostgreSQL or Redis) with optimistic concurrency (a version
   on the game) and a pub/sub (e.g. Redis) for the notifier. Both are new adapters; the domain does
   not change.
+- Games are never evicted and game creation is not rate limited: a scripted client can grow the
+  process memory without bound. Accepted for a demo; the fix is a TTL on finished or idle games and
+  rate limiting on `POST /api/games` (README, next steps).
