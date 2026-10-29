@@ -1,5 +1,3 @@
-"""Domain events, one per `GameEvent` type of the API contract, in the order they occur."""
-
 from dataclasses import dataclass
 from typing import TypeAlias
 

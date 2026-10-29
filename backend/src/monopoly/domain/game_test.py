@@ -50,9 +50,6 @@ def new_game(seats: int = 2, starting_money: int = 1000, salary: int = 200) -> G
     return game
 
 
-# --- create -------------------------------------------------------------------------------
-
-
 def test_create_returns_a_waiting_game_without_players() -> None:
     game = Game.create(code="ABCDEF", seats=3)
 
@@ -74,9 +71,6 @@ def test_create_rejects_seat_count_outside_rules(seats: int) -> None:
 def test_domain_errors_share_a_base_class() -> None:
     with pytest.raises(GameError):
         Game.create(code="ABCDEF", seats=9)
-
-
-# --- join ---------------------------------------------------------------------------------
 
 
 def test_join_assigns_ids_in_order_with_starting_money() -> None:
@@ -141,18 +135,12 @@ def test_join_after_the_game_started_is_rejected() -> None:
         game.join("Cleo")
 
 
-# --- player lookup ------------------------------------------------------------------------
-
-
 def test_player_lookup_raises_for_unknown_ids() -> None:
     game = new_game()
 
     assert game.player("p2").name == "Bob"
     with pytest.raises(UnknownPlayerError):
         game.player("p9")
-
-
-# --- play_turn guards ---------------------------------------------------------------------
 
 
 def test_play_turn_before_start_is_rejected() -> None:
@@ -195,9 +183,6 @@ def test_play_turn_after_the_game_finished_is_rejected() -> None:
     assert game.status is GameStatus.FINISHED
     with pytest.raises(GameNotInProgressError):
         game.play_turn("p2", 1)
-
-
-# --- a full turn --------------------------------------------------------------------------
 
 
 def test_turn_on_an_empty_square_rolls_moves_and_passes() -> None:

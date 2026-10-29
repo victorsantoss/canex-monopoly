@@ -63,8 +63,6 @@ class FixedDice:
 
 
 class SequenceGenerator:
-    """Hands out the given values in order, for both codes and tokens."""
-
     def __init__(self, *values: str) -> None:
         self._values: Iterator[str] = iter(values)
 

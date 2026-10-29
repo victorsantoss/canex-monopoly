@@ -28,7 +28,7 @@ class JoinedGameResponse(BaseModel):
 
 
 def create_game_router(service: GameService) -> APIRouter:
-    # Name and seat count rules live in the domain; the request models only check JSON types.
+    # Request models only check JSON types: name and seat count rules belong to the domain.
     router = APIRouter(prefix="/api/games")
 
     @router.post("", status_code=status.HTTP_201_CREATED)

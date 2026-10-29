@@ -1,5 +1,3 @@
-"""Acceptance scenarios for the lobby (docs/spec.md, section 4, "Lobby")."""
-
 import string
 
 import pytest

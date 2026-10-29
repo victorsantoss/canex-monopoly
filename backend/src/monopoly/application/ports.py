@@ -12,8 +12,6 @@ class GameRepository(Protocol):
 
 
 class SeatRegistry(Protocol):
-    """Maps the secret token handed to a player to their seat in a game."""
-
     def register(self, code: str, player_id: str, token: str) -> None: ...
 
     def find_player_id(self, code: str, token: str) -> str | None: ...

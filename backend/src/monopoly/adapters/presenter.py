@@ -1,5 +1,3 @@
-"""Turns the domain into the JSON shapes of the API contract, for both HTTP and WebSocket."""
-
 from collections.abc import Sequence
 from dataclasses import asdict
 
