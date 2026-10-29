@@ -34,6 +34,8 @@ production build (`npm run build`) has to be served behind a reverse proxy that 
 
 **Play:** open http://localhost:5173, create a game, then open the invite link in other browsers
 (or other tabs: each tab is a separate player, see [ADR 4](docs/adr/0004-player-identity-with-secret-token.md)).
+A closed tab or another device takes the seat back through the **private link** shown on the game
+screen (the token travels in the URL fragment, never sent to the server).
 
 ## Quality checks
 
@@ -54,11 +56,15 @@ npm run build
 
 Spec first, then acceptance tests, then unit tests per layer (ATDD + TDD):
 
-1. [`docs/spec.md`](docs/spec.md) — rules, **decisions on every ambiguity (D1–D13)**, acceptance scenarios.
+1. [`docs/spec.md`](docs/spec.md) — rules, **decisions on every ambiguity (D1–D14)**, acceptance scenarios.
 2. [`docs/api.md`](docs/api.md) — the REST + WebSocket contract, written before any code so the
    backend and the frontend could be built in parallel.
 3. [`docs/adr/`](docs/adr) — architectural decisions.
 4. One GitHub issue per vertical slice, one PR per issue; each PR maps acceptance criteria to tests.
+   Independent slices (domain, WebSocket hub, frontend) were built in parallel against the contract.
+5. A clean-code pass, then an independent review of the whole codebase; its findings were fixed in
+   two PRs (aggregate encapsulation, error contract, WebSocket back-pressure, rejoin, token exposure).
+6. Full games played in the browser and through the simulation script before calling it done.
 
 ## Architecture
 
@@ -122,11 +128,8 @@ Unit tests check each rule; only a simulation checks that the rules together mak
   PostgreSQL adapter for `GameRepository` with optimistic concurrency (a version per game), and a
   Redis pub/sub adapter for `GameNotifier`, so games survive restarts and several instances can
   serve the same game. The domain does not change.
-- **Seat recovery after closing the tab:** this is a client-side loss (the token lived in
-  `sessionStorage`), so a database alone does not fix it. Options: `localStorage` keyed by game, a
-  private "resume" link carrying the token, or accounts.
 - **Abuse protection:** rate limiting on joins (codes are brute-forceable), game expiry.
-- **Optional accounts** to reconnect from another device (today a closed tab loses its seat).
+- **Optional accounts**, so a seat survives without keeping the private resume link.
 - **Official rules kept out of scope on purpose** (the statement does not evaluate them), with
   the extension already designed:
   - *Jail* ([#16](https://github.com/victorsantoss/canex-monopoly/issues/16)): new square types in
