@@ -1,0 +1,14 @@
+$font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: $font-stack;
+  background: #f4f1ea;
+  color: #1f2328;
+}
