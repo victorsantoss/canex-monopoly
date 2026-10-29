@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { errorMessage, playTurn } from '../api/game-api'
+import { ApiError, errorMessage, playTurn } from '../api/game-api'
 import type { GameState } from '../api/types'
 import type { PlayerSession } from '../session/player-session'
 import { isMyTurn } from './game-view'
@@ -7,9 +7,10 @@ import { isMyTurn } from './game-view'
 interface RollButtonProps {
   state: GameState
   session: PlayerSession
+  onSeatRejected: () => void
 }
 
-export function RollButton({ state, session }: RollButtonProps) {
+export function RollButton({ state, session, onSeatRejected }: RollButtonProps) {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -21,6 +22,10 @@ export function RollButton({ state, session }: RollButtonProps) {
       // this one included, through the game channel, so there is a single source of updates.
       await playTurn(state.code, session.playerToken)
     } catch (reason) {
+      if (reason instanceof ApiError && reason.status === 401) {
+        onSeatRejected()
+        return
+      }
       setError(errorMessage(reason))
     } finally {
       setPending(false)

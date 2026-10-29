@@ -23,6 +23,14 @@ export function savePlayerSession(code: string, session: PlayerSession): void {
   }
 }
 
+export function clearPlayerSession(code: string): void {
+  try {
+    sessionStorage.removeItem(keyFor(code))
+  } catch {
+    // Nothing was stored if storage is blocked.
+  }
+}
+
 export function loadPlayerSession(code: string): PlayerSession | null {
   try {
     const raw = sessionStorage.getItem(keyFor(code))

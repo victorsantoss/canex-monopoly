@@ -7,11 +7,13 @@ import { EventLog } from './event-log'
 import styles from './game-screen.module.scss'
 import { InviteBox } from './invite-box'
 import { PlayersPanel } from './players-panel'
+import { ResumeBox } from './resume-box'
 import { RollButton } from './roll-button'
 
 interface GameScreenProps {
   code: string
   session: PlayerSession
+  onSeatRejected: () => void
 }
 
 function Banner({ state }: { state: GameState }) {
@@ -33,7 +35,7 @@ function Banner({ state }: { state: GameState }) {
   return null
 }
 
-export function GameScreen({ code, session }: GameScreenProps) {
+export function GameScreen({ code, session, onSeatRejected }: GameScreenProps) {
   const { state, eventLog, connectionStatus, notFound } = useGameChannel(code)
 
   if (notFound) {
@@ -64,9 +66,10 @@ export function GameScreen({ code, session }: GameScreenProps) {
       <div className={styles.layout}>
         <Board state={state} />
         <aside className={styles.side}>
-          <RollButton state={state} session={session} />
+          <RollButton state={state} session={session} onSeatRejected={onSeatRejected} />
           <PlayersPanel state={state} myPlayerId={session.playerId} />
           <EventLog entries={eventLog} context={state} />
+          <ResumeBox code={state.code} session={session} />
         </aside>
       </div>
     </main>
