@@ -7,7 +7,6 @@ from monopoly.adapters.http.error_handlers import install_error_handlers
 from monopoly.application.errors import GameNotFoundError, InvalidPlayerTokenError
 from monopoly.domain.errors import (
     GameAlreadyStartedError,
-    GameFullError,
     GameNotInProgressError,
     InvalidPlayerNameError,
     InvalidSeatCountError,
@@ -41,7 +40,6 @@ def build_client(error: Exception) -> TestClient:
         (NotYourTurnError("bad turn"), 403),
         (GameNotFoundError("no game"), 404),
         (GameAlreadyStartedError("started"), 409),
-        (GameFullError("full"), 409),
         (GameNotInProgressError("not in progress"), 409),
         (InvalidSeatCountError("seats"), 422),
         (InvalidPlayerNameError("name"), 422),
@@ -57,7 +55,7 @@ def test_errors_map_to_their_status_with_a_detail_message(
 
 
 def test_request_validation_errors_are_422_with_a_string_detail() -> None:
-    response = build_client(GameFullError()).post("/validate", json={"seats": "many"})
+    response = build_client(GameNotFoundError()).post("/validate", json={"seats": "many"})
 
     assert response.status_code == 422
     detail = response.json()["detail"]

@@ -3,7 +3,6 @@ from enum import StrEnum
 from monopoly.domain.board import STANDARD_BOARD, Board, PropertySquare
 from monopoly.domain.errors import (
     GameAlreadyStartedError,
-    GameFullError,
     GameNotInProgressError,
     InvalidPlayerNameError,
     InvalidRollError,
@@ -38,8 +37,6 @@ class GameStatus(StrEnum):
 
 
 class Game:
-    """The game aggregate: every rule change goes through `join` and `play_turn`."""
-
     def __init__(self, code: str, seats: int, board: Board, rules: GameRules) -> None:
         self._code = code
         self._seats = seats
@@ -64,8 +61,6 @@ class Game:
                 f"Seats must be between {rules.min_seats} and {rules.max_seats}, got {seats}."
             )
         return cls(code=code, seats=seats, board=board, rules=rules)
-
-    # --- read-only accessors ----------------------------------------------------------
 
     @property
     def code(self) -> str:
@@ -112,14 +107,9 @@ class Game:
                 return candidate
         raise UnknownPlayerError(f"Unknown player {player_id!r}.")
 
-    # --- commands ---------------------------------------------------------------------
-
     def join(self, player_name: str) -> tuple[Player, list[GameEvent]]:
         if self._status is not GameStatus.WAITING:
             raise GameAlreadyStartedError("The game has already started.")
-        # Unreachable while the game starts on the last seat, kept to protect the invariant.
-        if len(self._players) >= self._seats:
-            raise GameFullError("The game is full.")
         name = player_name.strip()
         if not 1 <= len(name) <= MAX_PLAYER_NAME_LENGTH:
             raise InvalidPlayerNameError(
@@ -148,8 +138,6 @@ class Game:
         events += self._end_turn()
         return events
 
-    # --- turn steps -------------------------------------------------------------------
-
     def _ensure_can_play(self, player_id: str) -> Player:
         if self._status is not GameStatus.IN_PROGRESS:
             raise GameNotInProgressError("The game is not in progress.")
@@ -160,15 +148,15 @@ class Game:
 
     def _move(self, player: Player, roll: int) -> list[GameEvent]:
         from_position = player.position
-        steps = from_position + roll
-        player.position = steps % self._board.size
+        distance_from_start = from_position + roll
+        player.position = distance_from_start % self._board.size
         events: list[GameEvent] = [
             PlayerMoved(
                 player_id=player.id, from_position=from_position, to_position=player.position
             )
         ]
-        # Reaching the board size means the move crossed Start or stopped on it.
-        if steps >= self._board.size:
+        reached_start = distance_from_start >= self._board.size
+        if reached_start:
             player.money += self._rules.salary
             events.append(SalaryReceived(player_id=player.id, amount=self._rules.salary))
         return events
