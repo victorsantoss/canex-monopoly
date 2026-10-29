@@ -22,6 +22,13 @@ class JoinedGame:
 
 
 @dataclass(frozen=True)
+class GameSettings:
+    starting_money: int = GameRules.starting_money
+    salary: int = GameRules.salary
+    rent_percent: int = GameRules.rent_percent
+
+
+@dataclass(frozen=True)
 class TurnResult:
     game: Game
     events: list[GameEvent]
@@ -50,8 +57,13 @@ class GameService:
         self,
         player_name: str,
         seats: int,
-        rules: GameRules = GameRules(),  # noqa: B008 - GameRules is frozen, sharing it is safe
+        settings: GameSettings = GameSettings(),  # noqa: B008 - frozen, sharing it is safe
     ) -> JoinedGame:
+        rules = GameRules.configured(
+            starting_money=settings.starting_money,
+            salary=settings.salary,
+            rent_percent=settings.rent_percent,
+        )
         game = Game(code=self._new_code(), seats=seats, rules=rules)
         return await self._seat(game, player_name)
 

@@ -5,19 +5,18 @@ from pydantic import BaseModel, Field
 
 from monopoly.adapters.presenter import JsonObject, event_to_json, game_to_json
 from monopoly.application.errors import InvalidPlayerTokenError
-from monopoly.application.game_service import GameService, JoinedGame
-from monopoly.domain.rules import GameRules
+from monopoly.application.game_service import GameService, GameSettings, JoinedGame
 
-DEFAULT_RULES = GameRules()
+DEFAULT_SETTINGS = GameSettings()
 
 
 class GameSettingsRequest(BaseModel):
-    starting_money: int = DEFAULT_RULES.starting_money
-    salary: int = DEFAULT_RULES.salary
-    rent_percent: int = DEFAULT_RULES.rent_percent
+    starting_money: int = DEFAULT_SETTINGS.starting_money
+    salary: int = DEFAULT_SETTINGS.salary
+    rent_percent: int = DEFAULT_SETTINGS.rent_percent
 
-    def to_rules(self) -> GameRules:
-        return GameRules.configured(
+    def to_settings(self) -> GameSettings:
+        return GameSettings(
             starting_money=self.starting_money,
             salary=self.salary,
             rent_percent=self.rent_percent,
@@ -52,7 +51,7 @@ def create_game_router(service: GameService) -> APIRouter:
     @router.post("", status_code=status.HTTP_201_CREATED)
     async def create_game(request: CreateGameRequest) -> JoinedGameResponse:
         joined = await service.create_game(
-            request.player_name, request.seats, request.settings.to_rules()
+            request.player_name, request.seats, request.settings.to_settings()
         )
         return JoinedGameResponse.of(joined)
 

@@ -3,9 +3,10 @@ from collections.abc import Iterator, Sequence
 import pytest
 
 from monopoly.application.errors import GameNotFoundError, InvalidPlayerTokenError
-from monopoly.application.game_service import GameService, JoinedGame
+from monopoly.application.game_service import GameService, GameSettings, JoinedGame
 from monopoly.domain.errors import (
     GameAlreadyStartedError,
+    InvalidGameSettingsError,
     InvalidPlayerNameError,
     InvalidSeatCountError,
     NotYourTurnError,
@@ -110,14 +111,28 @@ async def test_create_game_saves_a_waiting_game_with_the_creator_seated(
     ]
 
 
-async def test_create_game_uses_the_given_rules(fixture: Fixture) -> None:
-    rules = GameRules(starting_money=2500, salary=120, rent_percent=50)
+async def test_create_game_builds_the_rules_from_the_settings(fixture: Fixture) -> None:
+    settings = GameSettings(starting_money=2500, salary=120, rent_percent=50)
 
-    await fixture.service.create_game("Ana", seats=2, rules=rules)
+    await fixture.service.create_game("Ana", seats=2, settings=settings)
 
-    game = fixture.repository.games["GAME01"]
-    assert game.rules == rules
-    assert game.players[0].money == 2500
+    rules = fixture.repository.games["GAME01"].rules
+    assert (rules.starting_money, rules.salary, rules.rent_percent) == (2500, 120, 50)
+
+
+async def test_create_game_uses_the_default_rules_without_settings(fixture: Fixture) -> None:
+    await fixture.service.create_game("Ana", seats=2)
+
+    assert fixture.repository.games["GAME01"].rules == GameRules()
+
+
+async def test_create_game_rejects_settings_out_of_bounds(fixture: Fixture) -> None:
+    settings = GameSettings(starting_money=1, salary=50, rent_percent=100)
+
+    with pytest.raises(InvalidGameSettingsError):
+        await fixture.service.create_game("Ana", seats=2, settings=settings)
+
+    assert fixture.repository.games == {}
 
 
 async def test_create_game_draws_a_new_code_until_it_is_free() -> None:
