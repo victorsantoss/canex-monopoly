@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import type { JoinedGame } from '../api/types'
 import { GameScreen } from '../game/game-screen'
@@ -27,10 +27,12 @@ function adoptSeatFromFragment(code: string): void {
 }
 
 function GameForCode({ code }: { code: string }) {
-  const [session, setSession] = useState<PlayerSession | null>(() => {
-    adoptSeatFromFragment(code)
-    return loadPlayerSession(code)
-  })
+  // Render only reads the fragment; persisting the seat and rewriting the URL are left to the effect.
+  const [session, setSession] = useState<PlayerSession | null>(
+    () => parseResumeFragment(window.location.hash) ?? loadPlayerSession(code),
+  )
+
+  useEffect(() => adoptSeatFromFragment(code), [code])
 
   const takeSeat = (joined: JoinedGame): void => {
     const newSession = { playerId: joined.player_id, playerToken: joined.player_token }

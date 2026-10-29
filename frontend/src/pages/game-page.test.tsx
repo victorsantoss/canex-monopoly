@@ -132,7 +132,7 @@ describe('GamePage', () => {
     expect(loadPlayerSession('K7Q2XA')).toBeNull()
   })
 
-  it('gives a seated player a private resume link', () => {
+  it('gives a seated player a private resume link, hidden until asked for', async () => {
     savePlayerSession('K7Q2XA', { playerId: 'p1', playerToken: 'secret-1' })
     renderGamePage()
 
@@ -140,15 +140,25 @@ describe('GamePage', () => {
 
     const resume = screen.getByRole('region', { name: 'Private link' })
     expect(resume).toHaveTextContent("Anyone with it can play as you; don't share it.")
+    expect(within(resume).queryByLabelText('Resume link')).not.toBeInTheDocument()
+    expect(resume).not.toHaveTextContent('secret-1')
+
+    await userEvent.click(within(resume).getByRole('button', { name: 'Show private link' }))
+
     expect(within(resume).getByLabelText('Resume link')).toHaveValue(
       `${location.origin}/games/K7Q2XA#player=p1&token=secret-1`,
     )
+
+    await userEvent.click(within(resume).getByRole('button', { name: 'Hide private link' }))
+
+    expect(within(resume).queryByLabelText('Resume link')).not.toBeInTheDocument()
   })
 
   it('forgets a seat whose token the server rejects and offers to join again', async () => {
     vi.mocked(playTurn).mockRejectedValue(new ApiError(401, 'Invalid player token'))
     savePlayerSession('K7Q2XA', { playerId: 'p1', playerToken: 'stale' })
     renderGamePage()
+    act(() => FakeWebSocket.latest().serverOpen())
     pushState(makeState({ current_player_id: 'p1' }))
 
     await userEvent.click(screen.getByRole('button', { name: 'Roll the die' }))

@@ -68,7 +68,12 @@ export function GameScreen({ code, session, onSeatRejected }: GameScreenProps) {
       <div className={styles.layout}>
         <Board state={state} />
         <aside className={styles.side}>
-          <RollButton state={state} session={session} onSeatRejected={onSeatRejected} />
+          <RollButton
+            state={state}
+            session={session}
+            connectionStatus={connectionStatus}
+            onSeatRejected={onSeatRejected}
+          />
           <PlayersPanel state={state} myPlayerId={session.playerId} />
           <EventLog entries={eventLog} context={state} />
           <ResumeBox code={state.code} session={session} />

@@ -5,7 +5,10 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.testclient import TestClient
 
 from monopoly.adapters.realtime.websocket_hub import WebSocketHub
-from monopoly.adapters.realtime.websocket_routes import create_websocket_router
+from monopoly.adapters.realtime.websocket_routes import (
+    TOO_MANY_CONNECTIONS_CLOSE_CODE,
+    create_websocket_router,
+)
 
 KNOWN_GAMES = frozenset({"ABC123", "ZZZ999"})
 
@@ -96,3 +99,21 @@ def test_socket_is_unregistered_when_the_client_disconnects() -> None:
         assert hub.disconnected == []
 
     assert hub.disconnected == ["ABC123"]
+
+
+class FullHub(WebSocketHub):
+    async def connect(self, code: str, websocket: WebSocket) -> bool:
+        await websocket.accept()
+        return False
+
+
+def test_connection_refused_by_the_hub_is_closed_with_its_code() -> None:
+    client = build_client(FullHub())
+
+    with (
+        pytest.raises(WebSocketDisconnect) as closed,
+        client.websocket_connect("/ws/games/ABC123") as socket,
+    ):
+        socket.receive_json()
+
+    assert closed.value.code == TOO_MANY_CONNECTIONS_CLOSE_CODE

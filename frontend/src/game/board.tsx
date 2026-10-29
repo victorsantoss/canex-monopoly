@@ -1,6 +1,6 @@
 import type { GameState } from '../api/types'
 import styles from './board.module.scss'
-import { playerColor, ringCell } from './game-view'
+import { playerColor, ringCell, ringSide } from './game-view'
 
 interface BoardProps {
   state: GameState
@@ -8,7 +8,7 @@ interface BoardProps {
 
 export function Board({ state }: BoardProps) {
   const { board, players } = state
-  const side = board.length / 4 + 1
+  const side = ringSide(board.length)
 
   return (
     <ol className={styles.board} style={{ gridTemplateColumns: `repeat(${side}, 1fr)` }} aria-label="Board">
