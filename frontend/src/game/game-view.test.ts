@@ -1,5 +1,5 @@
 import { makePlayer, makeState } from '../test-support/game-fixtures'
-import { isMyTurn, playerColor, ringCell } from './game-view'
+import { describeSettings, isMyTurn, playerColor, ringCell } from './game-view'
 
 describe('isMyTurn', () => {
   it('is true when the game is in progress and I am the current player', () => {
@@ -12,6 +12,14 @@ describe('isMyTurn', () => {
 
   it.each(['waiting', 'finished'] as const)('is false while the game is %s', (status) => {
     expect(isMyTurn(makeState({ status, current_player_id: 'p1' }), 'p1')).toBe(false)
+  })
+})
+
+describe('describeSettings', () => {
+  it('summarizes the economy of the game', () => {
+    expect(describeSettings({ starting_money: 1000, salary: 50, rent_percent: 100 })).toBe(
+      'Start 1000 · Salary 50 · Rent 100% of price',
+    )
   })
 })
 

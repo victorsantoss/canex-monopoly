@@ -9,6 +9,7 @@ const state: GameState = {
   seats: 2,
   current_player_id: null,
   winner_id: null,
+  settings: { starting_money: 1000, salary: 50, rent_percent: 100 },
   board: [],
   players: [],
 }
@@ -32,15 +33,16 @@ describe('game api', () => {
     vi.unstubAllGlobals()
   })
 
-  it('creates a game', async () => {
+  it('creates a game with its settings', async () => {
     fetchMock.mockResolvedValue(jsonResponse(201, joined))
+    const settings = { starting_money: 2500, salary: 120, rent_percent: 50 }
 
-    await expect(createGame('Ana', 3)).resolves.toEqual(joined)
+    await expect(createGame('Ana', 3, settings)).resolves.toEqual(joined)
 
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toBe('/api/games')
     expect(init?.method).toBe('POST')
-    expect(JSON.parse(String(init?.body))).toEqual({ player_name: 'Ana', seats: 3 })
+    expect(JSON.parse(String(init?.body))).toEqual({ player_name: 'Ana', seats: 3, settings })
   })
 
   it('joins a game, encoding the code in the path', async () => {

@@ -1,7 +1,11 @@
-import type { GameState, PlayerId, PlayerView } from '../api/types'
+import type { GameSettings, GameState, PlayerId, PlayerView } from '../api/types'
 
 export function isMyTurn(state: GameState, playerId: PlayerId): boolean {
   return state.status === 'in_progress' && state.current_player_id === playerId
+}
+
+export function describeSettings(settings: GameSettings): string {
+  return `Start ${settings.starting_money} · Salary ${settings.salary} · Rent ${settings.rent_percent}% of price`
 }
 
 const SEAT_COLORS = ['#d1495b', '#00798c', '#edae49', '#6a4c93']

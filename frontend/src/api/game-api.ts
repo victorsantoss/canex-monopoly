@@ -1,4 +1,4 @@
-import type { GameState, JoinedGame, TurnPlayed } from './types'
+import type { GameSettings, GameState, JoinedGame, TurnPlayed } from './types'
 
 export class ApiError extends Error {
   readonly status: number
@@ -46,8 +46,8 @@ function postJson<T>(path: string, body: unknown): Promise<T> {
   })
 }
 
-export function createGame(playerName: string, seats: number): Promise<JoinedGame> {
-  return postJson<JoinedGame>('/api/games', { player_name: playerName, seats })
+export function createGame(playerName: string, seats: number, settings: GameSettings): Promise<JoinedGame> {
+  return postJson<JoinedGame>('/api/games', { player_name: playerName, seats, settings })
 }
 
 export function joinGame(code: string, playerName: string): Promise<JoinedGame> {
