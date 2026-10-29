@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const venvBin = process.platform === 'win32' ? '.venv/Scripts' : '.venv/bin'
+// cmd.exe does not run a program given with forward slashes.
+const uvicorn = process.platform === 'win32' ? '.venv\\Scripts\\uvicorn.exe' : '.venv/bin/uvicorn'
 
 export default defineConfig({
   testDir: './e2e',
@@ -15,7 +16,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      command: `${venvBin}/uvicorn monopoly.main:app --port 8000`,
+      command: `${uvicorn} monopoly.main:app --port 8000`,
       cwd: '../backend',
       url: 'http://localhost:8000/api/health',
       reuseExistingServer: true,
