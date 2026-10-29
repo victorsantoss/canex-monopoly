@@ -1,5 +1,12 @@
 import { makePlayer, makeState } from '../test-support/game-fixtures'
-import { describeSettings, isMyTurn, playerColor, ringCell } from './game-view'
+import { describeSettings, isMyTurn, playerColor, ringCell, ringSide } from './game-view'
+
+describe('ringSide', () => {
+  it('counts the cells along one edge, corners included', () => {
+    expect(ringSide(16)).toBe(5)
+    expect(ringSide(40)).toBe(11)
+  })
+})
 
 describe('isMyTurn', () => {
   it('is true when the game is in progress and I am the current player', () => {

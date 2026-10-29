@@ -20,10 +20,14 @@ export interface GridCell {
   column: number
 }
 
+export function ringSide(boardSize: number): number {
+  return boardSize / 4 + 1
+}
+
 // Clockwise around the edge of a square grid, Start in the top-left corner.
 export function ringCell(index: number, boardSize: number): GridCell {
-  const side = boardSize / 4
-  const last = side + 1
+  const last = ringSide(boardSize)
+  const side = last - 1
   if (index <= side) return { row: 1, column: index + 1 }
   if (index <= 2 * side) return { row: index - side + 1, column: last }
   if (index <= 3 * side) return { row: last, column: last - (index - 2 * side) }
