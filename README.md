@@ -98,6 +98,13 @@ See [spec §3](docs/spec.md#3-decisions-on-ambiguities) for the full list and ra
   `GameRepository` port, a `list_games` use case and a REST adapter. It needs a public/private
   `visibility` on the game first: listing waiting games would expose their codes, which are the
   invitation today.
+- **Persistence and scale-out** ([ADR 3](docs/adr/0003-in-memory-single-process.md)): a
+  PostgreSQL adapter for `GameRepository` with optimistic concurrency (a version per game), and a
+  Redis pub/sub adapter for `GameNotifier`, so games survive restarts and several instances can
+  serve the same game. The domain does not change.
+- **Seat recovery after closing the tab:** this is a client-side loss (the token lived in
+  `sessionStorage`), so a database alone does not fix it. Options: `localStorage` keyed by game, a
+  private "resume" link carrying the token, or accounts.
 - **Abuse protection:** rate limiting on joins (codes are brute-forceable), game expiry.
 - **Optional accounts** to reconnect from another device (today a closed tab loses its seat).
 <!-- more items at the end of the timebox -->
