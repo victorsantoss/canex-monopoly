@@ -94,4 +94,10 @@ See [spec §3](docs/spec.md#3-decisions-on-ambiguities) for the full list and ra
 
 ## With more time
 
-<!-- filled at the end of the timebox -->
+- **Game browser** (waiting / in progress / finished): a `list(status)` query on the
+  `GameRepository` port, a `list_games` use case and a REST adapter. It needs a public/private
+  `visibility` on the game first: listing waiting games would expose their codes, which are the
+  invitation today.
+- **Abuse protection:** rate limiting on joins (codes are brute-forceable), game expiry.
+- **Optional accounts** to reconnect from another device (today a closed tab loses its seat).
+<!-- more items at the end of the timebox -->
