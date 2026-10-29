@@ -10,7 +10,9 @@ debrief. They must be testable without HTTP, WebSockets or a database.
 - `domain/` holds the rules as plain Python: the `Game` aggregate, the board, players and domain
   events. It imports nothing from FastAPI or the application layer.
 - `application/` holds the use cases (`create_game`, `join_game`, `play_turn`) and the ports they
-  depend on: `GameRepository`, `GameNotifier`, `Dice`, `CodeGenerator`, `TokenGenerator`.
+  depend on: `GameRepository`, `SeatRegistry`, `GameNotifier`, `Dice`, `CodeGenerator`,
+  `TokenGenerator`. Seat tokens live in the application layer, not in the domain: they are an
+  access concern, not a game rule.
 - `adapters/` implement those ports (in-memory repository, random dice, WebSocket notifier) and the
   driving side (FastAPI routes).
 - `main.py` is the composition root: the only place that wires adapters into use cases.
