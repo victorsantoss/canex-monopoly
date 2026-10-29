@@ -149,6 +149,7 @@ describe('GamePage', () => {
     vi.mocked(playTurn).mockRejectedValue(new ApiError(401, 'Invalid player token'))
     savePlayerSession('K7Q2XA', { playerId: 'p1', playerToken: 'stale' })
     renderGamePage()
+    act(() => FakeWebSocket.latest().serverOpen())
     pushState(makeState({ current_player_id: 'p1' }))
 
     await userEvent.click(screen.getByRole('button', { name: 'Roll the die' }))
