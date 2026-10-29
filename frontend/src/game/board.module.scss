@@ -98,11 +98,13 @@ $groups: (#7a4a2a, #3f86b0, #b63d78, #c9651c, #b8282c, #23457a);
 
   .name {
     font-weight: 500;
+    color: var(--ink-soft);
   }
 }
 
 .name {
   font-weight: 700;
+  color: var(--ink);
 }
 
 .prices {
