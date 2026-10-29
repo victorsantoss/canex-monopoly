@@ -16,7 +16,6 @@ class EmptySquare:
 class PropertySquare:
     name: str
     price: int
-    rent: int
 
 
 Square: TypeAlias = StartSquare | EmptySquare | PropertySquare
@@ -37,20 +36,20 @@ class Board:
 STANDARD_BOARD = Board(
     squares=(
         StartSquare(),
-        PropertySquare(name="Rue Ontario", price=60, rent=30),
+        PropertySquare(name="Rue Ontario", price=60),
         EmptySquare(),
-        PropertySquare(name="Rue Wellington", price=80, rent=40),
-        PropertySquare(name="Avenue du Mont-Royal", price=100, rent=50),
+        PropertySquare(name="Rue Wellington", price=80),
+        PropertySquare(name="Avenue du Mont-Royal", price=100),
         EmptySquare(),
-        PropertySquare(name="Rue Saint-Denis", price=140, rent=70),
-        PropertySquare(name="Boulevard Saint-Laurent", price=160, rent=80),
+        PropertySquare(name="Rue Saint-Denis", price=140),
+        PropertySquare(name="Boulevard Saint-Laurent", price=160),
         EmptySquare(),
-        PropertySquare(name="Rue Sainte-Catherine", price=180, rent=90),
-        PropertySquare(name="Avenue Laurier", price=200, rent=100),
+        PropertySquare(name="Rue Sainte-Catherine", price=180),
+        PropertySquare(name="Avenue Laurier", price=200),
         EmptySquare(),
-        PropertySquare(name="Rue Sherbrooke", price=240, rent=120),
-        PropertySquare(name="Avenue du Parc", price=260, rent=130),
-        PropertySquare(name="Boulevard René-Lévesque", price=300, rent=150),
-        PropertySquare(name="Avenue Greene", price=350, rent=175),
+        PropertySquare(name="Rue Sherbrooke", price=240),
+        PropertySquare(name="Avenue du Parc", price=260),
+        PropertySquare(name="Boulevard René-Lévesque", price=300),
+        PropertySquare(name="Avenue Greene", price=350),
     )
 )

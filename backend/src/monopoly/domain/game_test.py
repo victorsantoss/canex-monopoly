@@ -28,12 +28,13 @@ from monopoly.domain.game import Game, GameStatus
 from monopoly.domain.rules import GameRules
 
 # Start, a property, an empty lot, another property: small enough to reason about laps.
+# At 40% of the price, A rents for 40 and B for 24.
 BOARD = Board(
     squares=(
         StartSquare(),
-        PropertySquare(name="A", price=100, rent=40),
+        PropertySquare(name="A", price=100),
         EmptySquare(),
-        PropertySquare(name="B", price=60, rent=20),
+        PropertySquare(name="B", price=60),
     )
 )
 
@@ -43,7 +44,7 @@ def new_game(seats: int = 2, starting_money: int = 1000, salary: int = 200) -> G
         code="ABCDEF",
         seats=seats,
         board=BOARD,
-        rules=GameRules(starting_money=starting_money, salary=salary),
+        rules=GameRules(starting_money=starting_money, salary=salary, rent_percent=40),
     )
     for name in ["Ana", "Bob", "Cleo", "Dan"][:seats]:
         game.join(name)
@@ -178,7 +179,7 @@ def test_play_turn_after_the_game_finished_is_rejected() -> None:
     game = new_game(starting_money=100)
     game.play_turn("p1", 1)  # buys A for 100, money 0
     game.play_turn("p2", 3)  # buys B, money 40
-    game.play_turn("p1", 2)  # 1 -> 3, owes 20 with 0: bankrupt
+    game.play_turn("p1", 2)  # 1 -> 3, owes 24 with 0: bankrupt
 
     assert game.status is GameStatus.FINISHED
     with pytest.raises(GameNotInProgressError):
@@ -309,12 +310,12 @@ def test_landing_on_own_property_has_no_effect() -> None:
 
 def test_bankruptcy_pays_the_rest_frees_properties_and_skips_the_player() -> None:
     game = new_game(seats=3, starting_money=100, salary=0)
-    game.play_turn("p1", 3)  # p1 buys B (rent 20), money 40
+    game.play_turn("p1", 3)  # p1 buys B (rent 24), money 40
     game.play_turn("p2", 1)  # p2 buys A (rent 40), money 0
     game.play_turn("p3", 2)  # p3 on the empty lot
 
     game.play_turn("p1", 3)  # 3 -> 2, empty lot
-    events = game.play_turn("p2", 2)  # 1 -> 3, owes 20 with 0: bankrupt
+    events = game.play_turn("p2", 2)  # 1 -> 3, owes 24 with 0: bankrupt
 
     assert events == [
         DiceRolled(player_id="p2", value=2),
@@ -355,7 +356,7 @@ def test_last_player_standing_wins() -> None:
     game.play_turn("p1", 1)  # buys A for 100, money 0
     game.play_turn("p2", 3)  # buys B for 60, money 40
 
-    events = game.play_turn("p1", 2)  # 1 -> 3, owes 20 with 0
+    events = game.play_turn("p1", 2)  # 1 -> 3, owes 24 with 0
 
     assert events[-2:] == [
         PlayerBankrupted(player_id="p1", creditor_id="p2"),

@@ -20,7 +20,7 @@ function makeBoard(): Square[] {
 }
 
 export function makePlayer(id: string, name: string, overrides: Partial<PlayerView> = {}): PlayerView {
-  return { id, name, money: 1500, position: 0, is_bankrupt: false, ...overrides }
+  return { id, name, money: 1000, position: 0, is_bankrupt: false, ...overrides }
 }
 
 export function makeState(overrides: Partial<GameState> = {}): GameState {
@@ -30,6 +30,7 @@ export function makeState(overrides: Partial<GameState> = {}): GameState {
     seats: 2,
     current_player_id: 'p1',
     winner_id: null,
+    settings: { starting_money: 1000, salary: 50, rent_percent: 100 },
     board: makeBoard(),
     players: [makePlayer('p1', 'Ana'), makePlayer('p2', 'Bruno')],
     ...overrides,

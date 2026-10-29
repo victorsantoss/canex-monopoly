@@ -17,15 +17,31 @@ This document is the source of truth for the game behaviour. Every acceptance te
 
 ## 2. Game constants
 
-| Constant        | Value            |
-|-----------------|------------------|
-| Board size      | 16 squares       |
-| Starting money  | 1500             |
-| Salary          | 200              |
-| Die             | one six-sided die (1-6) |
-| Seats           | 2 to 4           |
+| Constant        | Default          | Creator may choose |
+|-----------------|------------------|--------------------|
+| Board size      | 16 squares       | -                  |
+| Starting money  | 1000             | 100 to 10000       |
+| Salary          | 50               | 0 to 1000          |
+| Rent            | 100% of the price | 10% to 200%       |
+| Die             | one six-sided die (1-6) | -           |
+| Seats           | -                | 2 to 4             |
 
-The board layout lives in `backend/src/monopoly/domain/board.py` (`STANDARD_BOARD`).
+Rent is rounded down. The board layout (names and prices) lives in
+`backend/src/monopoly/domain/board.py` (`STANDARD_BOARD`); the defaults and bounds live in
+`backend/src/monopoly/domain/rules.py`.
+
+### Economy check
+
+`backend/scripts/simulate_games.py` plays games with the domain rules and a seeded random die,
+and reports, per player count, how many finish within a turn cap and their median length. Run it
+from `backend/` with the virtualenv active: `python scripts/simulate_games.py --help`.
+
+300 games per player count, cap 1000 turns, seed 1:
+
+| start / salary / rent | 2 players | 3 players | 4 players |
+|---|---|---|---|
+| 1500 / 200 / 50% (previous) | 3% finish, median 312 turns | 0% | 0% |
+| 1000 / 50 / 100% (default) | 100%, median 27 turns | 95.7%, median 59 turns | 91%, median 121 turns |
 
 ## 3. Decisions on ambiguities
 
@@ -43,7 +59,8 @@ The board layout lives in `backend/src/monopoly/domain/board.py` (`STANDARD_BOAR
 | D10 | Who rolls the die? | The server. | A client-side roll could be forged. |
 | D11 | Player identity | Joining returns a secret player token; playing a turn requires it. | Prevents a player from playing for someone else. No accounts. |
 | D12 | A player leaves mid-game | Out of scope: the game waits for them (they can reload the page and continue). | No turn timer or kick in the timebox. |
-| D13 | Endless games | No turn limit. | Not in the rules; rents are tuned high enough for games to end. |
+| D13 | Endless games | No turn limit; the default economy is tuned so games end. | Rent only moves money between players while the salary adds money every lap, so a high salary and low rents never end a game. With the defaults, simulated games finish within 1000 turns 100% of the time with 2 players (median 27 turns) and 91% with 4 players (median 121 turns); see the economy check above. |
+| D14 | Can the economy be changed? | Yes: the creator may set starting money, salary and rent (as a percentage of the price) within the bounds above; absent settings take the defaults. The game state shows them. | Lets players trade a longer game for a shorter one without code changes; bounds keep games playable. |
 
 Out of scope on purpose: doubles, jail, cards, houses, trading, mortgages, auctions.
 
@@ -63,6 +80,7 @@ Out of scope on purpose: doubles, jail, cards, houses, trading, mortgages, aucti
 
 ### Lobby
 - **Create:** Given a name and a seat count between 2 and 4, when creating a game, then the game is waiting for players and the creator holds the first seat.
+- **Settings:** Given no settings, a new game uses the defaults; given valid settings, the game uses them and shows them in its state; settings out of bounds are rejected.
 - **Join:** Given a waiting game, when a player joins, then they take the next seat; when the last seat is taken, the game starts.
 - **Rejected join:** Joining an unknown, full or started game is rejected.
 - **Authorization:** Playing a turn with a missing token or another player's token is rejected.

@@ -18,6 +18,7 @@ from monopoly.domain.events import (
 )
 from monopoly.domain.game import Game
 from monopoly.domain.player import Player
+from monopoly.domain.rules import GameRules
 
 JsonObject = dict[str, object]
 
@@ -45,8 +46,13 @@ def game_to_json(game: Game) -> JsonObject:
         "seats": game.seats,
         "current_player_id": current.id if current else None,
         "winner_id": winner.id if winner else None,
+        "settings": {
+            "starting_money": game.rules.starting_money,
+            "salary": game.rules.salary,
+            "rent_percent": game.rules.rent_percent,
+        },
         "board": [
-            _square_to_json(index, square, game.owner_of(index))
+            _square_to_json(index, square, game.owner_of(index), game.rules)
             for index, square in enumerate(game.board.squares)
         ],
         "players": [_player_to_json(player) for player in game.players],
@@ -66,15 +72,17 @@ def game_updated_message(game: Game, events: Sequence[GameEvent]) -> JsonObject:
     }
 
 
-def _square_to_json(index: int, square: Square, owner_id: str | None) -> JsonObject:
+def _square_to_json(
+    index: int, square: Square, owner_id: str | None, rules: GameRules
+) -> JsonObject:
     match square:
-        case PropertySquare(name=name, price=price, rent=rent):
+        case PropertySquare(name=name, price=price):
             return {
                 "index": index,
                 "kind": "property",
                 "name": name,
                 "price": price,
-                "rent": rent,
+                "rent": rules.rent_for(price),
                 "owner_id": owner_id,
             }
         case StartSquare(name=name):

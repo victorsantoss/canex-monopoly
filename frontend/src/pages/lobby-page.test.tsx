@@ -41,9 +41,29 @@ describe('LobbyPage', () => {
     await userEvent.selectOptions(screen.getByLabelText('Players'), '3')
     await userEvent.click(screen.getByRole('button', { name: 'Create game' }))
 
-    expect(createGame).toHaveBeenCalledWith('Ana', 3)
+    expect(createGame).toHaveBeenCalledWith('Ana', 3, { starting_money: 1000, salary: 50, rent_percent: 100 })
     expect(await screen.findByText('Game route K7Q2XA')).toBeInTheDocument()
     expect(loadPlayerSession('K7Q2XA')).toEqual({ playerId: 'p1', playerToken: 'secret' })
+  })
+
+  it('offers the game settings pre-filled with the defaults and sends the chosen ones', async () => {
+    vi.mocked(createGame).mockResolvedValue({ code: 'K7Q2XA', player_id: 'p1', player_token: 'secret' })
+    renderLobby()
+
+    expect(screen.getByLabelText('Starting money')).toHaveValue(1000)
+    expect(screen.getByLabelText('Salary')).toHaveValue(50)
+    expect(screen.getByLabelText('Rent (% of price)')).toHaveValue(100)
+
+    await userEvent.type(screen.getByLabelText('Your name', { selector: '#create-name' }), 'Ana')
+    await userEvent.clear(screen.getByLabelText('Starting money'))
+    await userEvent.type(screen.getByLabelText('Starting money'), '2500')
+    await userEvent.clear(screen.getByLabelText('Salary'))
+    await userEvent.type(screen.getByLabelText('Salary'), '120')
+    await userEvent.clear(screen.getByLabelText('Rent (% of price)'))
+    await userEvent.type(screen.getByLabelText('Rent (% of price)'), '50')
+    await userEvent.click(screen.getByRole('button', { name: 'Create game' }))
+
+    expect(createGame).toHaveBeenCalledWith('Ana', 2, { starting_money: 2500, salary: 120, rent_percent: 50 })
   })
 
   it('joins a game by code', async () => {

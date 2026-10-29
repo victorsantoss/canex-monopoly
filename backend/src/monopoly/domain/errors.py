@@ -28,3 +28,7 @@ class UnknownPlayerError(GameError):
 
 class InvalidRollError(GameError):
     pass
+
+
+class InvalidGameSettingsError(GameError):
+    pass

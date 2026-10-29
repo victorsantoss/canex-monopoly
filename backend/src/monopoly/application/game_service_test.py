@@ -20,6 +20,7 @@ from monopoly.domain.events import (
     TurnPassed,
 )
 from monopoly.domain.game import Game, GameStatus
+from monopoly.domain.rules import GameRules
 
 
 class DictGameRepository:
@@ -107,6 +108,16 @@ async def test_create_game_saves_a_waiting_game_with_the_creator_seated(
     assert fixture.notifier.notifications == [
         ("GAME01", [PlayerJoined(player_id="p1", player_name="Ana")])
     ]
+
+
+async def test_create_game_uses_the_given_rules(fixture: Fixture) -> None:
+    rules = GameRules(starting_money=2500, salary=120, rent_percent=50)
+
+    await fixture.service.create_game("Ana", seats=2, rules=rules)
+
+    game = fixture.repository.games["GAME01"]
+    assert game.rules == rules
+    assert game.players[0].money == 2500
 
 
 async def test_create_game_draws_a_new_code_until_it_is_free() -> None:

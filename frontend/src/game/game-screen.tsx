@@ -4,6 +4,7 @@ import { useGameChannel } from '../api/use-game-channel'
 import type { PlayerSession } from '../session/player-session'
 import { Board } from './board'
 import { EventLog } from './event-log'
+import { describeSettings } from './game-view'
 import styles from './game-screen.module.scss'
 import { InviteBox } from './invite-box'
 import { PlayersPanel } from './players-panel'
@@ -61,6 +62,7 @@ export function GameScreen({ code, session, onSeatRejected }: GameScreenProps) {
         <h1>Game {state.code}</h1>
         {connectionStatus !== 'open' && <span className={styles.connection}>Reconnecting...</span>}
       </header>
+      <p className={styles.settings}>{describeSettings(state.settings)}</p>
       <Banner state={state} />
       {state.status === 'waiting' && <InviteBox code={state.code} />}
       <div className={styles.layout}>

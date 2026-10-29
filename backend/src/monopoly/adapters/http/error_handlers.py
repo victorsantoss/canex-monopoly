@@ -8,6 +8,7 @@ from monopoly.application.errors import GameNotFoundError, InvalidPlayerTokenErr
 from monopoly.domain.errors import (
     GameAlreadyStartedError,
     GameNotInProgressError,
+    InvalidGameSettingsError,
     InvalidPlayerNameError,
     InvalidSeatCountError,
     NotYourTurnError,
@@ -21,6 +22,7 @@ ERROR_STATUS: dict[type[Exception], int] = {
     GameNotInProgressError: HTTPStatus.CONFLICT,
     InvalidSeatCountError: HTTPStatus.UNPROCESSABLE_ENTITY,
     InvalidPlayerNameError: HTTPStatus.UNPROCESSABLE_ENTITY,
+    InvalidGameSettingsError: HTTPStatus.UNPROCESSABLE_ENTITY,
 }
 
 

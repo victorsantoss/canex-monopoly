@@ -183,13 +183,14 @@ class Game:
     def _pay_rent(
         self, player: Player, owner: Player, index: int, square: PropertySquare
     ) -> list[GameEvent]:
-        amount = min(square.rent, player.money)
+        rent = self._rules.rent_for(square.price)
+        amount = min(rent, player.money)
         player.money -= amount
         owner.money += amount
         events: list[GameEvent] = [
             RentPaid(player_id=player.id, owner_id=owner.id, square_index=index, amount=amount)
         ]
-        if amount < square.rent:
+        if amount < rent:
             events += self._bankrupt(player, creditor=owner)
         return events
 

@@ -23,12 +23,19 @@ export interface PlayerView {
   is_bankrupt: boolean
 }
 
+export interface GameSettings {
+  starting_money: number
+  salary: number
+  rent_percent: number
+}
+
 export interface GameState {
   code: string
   status: GameStatus
   seats: number
   current_player_id: PlayerId | null
   winner_id: PlayerId | null
+  settings: GameSettings
   board: Square[]
   players: PlayerView[]
 }

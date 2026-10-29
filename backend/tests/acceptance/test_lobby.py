@@ -164,7 +164,7 @@ def test_the_active_player_plays_a_turn(client: TestClient) -> None:
     assert body["state"]["players"][0] == {
         "id": "p1",
         "name": "Ana",
-        "money": 1420,
+        "money": 1000 - 80,
         "position": 3,
         "is_bankrupt": False,
     }
