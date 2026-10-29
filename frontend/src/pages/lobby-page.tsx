@@ -15,7 +15,9 @@ export function LobbyPage() {
 
   return (
     <main className={styles.lobby}>
-      <h1>Monopoly</h1>
+      <header className={styles.title}>
+        <h1>Monopoly</h1>
+      </header>
       <div className={styles.forms}>
         <CreateGameForm onJoined={enterGame} />
         <JoinGameForm onJoined={enterGame} />

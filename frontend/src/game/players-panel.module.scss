@@ -1,29 +1,113 @@
 .players {
   display: grid;
-  gap: 0.5rem;
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .player {
-  padding: 0.5rem;
-  border-left: 8px solid transparent;
-  background: #fffdf8;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-left: 6px solid transparent;
+  border-radius: var(--radius-s);
+  background: #fffdf6;
+  transition: box-shadow 200ms ease;
+
+  > :not(.disc) {
+    grid-column: 2;
+  }
+}
+
+.disc {
+  display: grid;
+  grid-row: span 2;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 800;
+  box-shadow: var(--shadow-lift);
 }
 
 .active {
-  background: #fff3c4;
+  border-color: var(--brass);
+  background: #fdf0cf;
+  box-shadow: 0 0 0 2px var(--brass-light);
+
+  .disc {
+    outline: 3px solid var(--ink);
+    outline-offset: 1px;
+  }
+}
+
+.out {
+  background: var(--paper-sunk);
+  color: var(--ink-soft);
+
+  .disc {
+    filter: grayscale(1);
+    opacity: 0.6;
+  }
+
+  strong {
+    text-decoration: line-through;
+  }
+}
+
+.identity {
+  overflow-wrap: anywhere;
+}
+
+.you,
+.playing {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.playing {
+  color: #6b4a00;
+  font-weight: 700;
+}
+
+.money {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+
+  span {
+    font-weight: 700;
+  }
 }
 
 .bankrupt {
-  margin-left: 0.5rem;
-  color: #b42318;
+  margin-left: var(--space-2);
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
 .properties {
-  margin: 0.25rem 0 0;
-  padding-left: 1.25rem;
-  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+
+  li {
+    padding: 0 var(--space-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    background: var(--paper);
+  }
 }

@@ -1,4 +1,34 @@
-$font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+// Design tokens: a felt table with paper cards and brass details.
+$font-stack: 'Bricolage Grotesque', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+:root {
+  --felt: #1d4a3a;
+  --felt-deep: #12352a;
+  --felt-text: #f3ead2;
+  --paper: #fbf5e4;
+  --paper-sunk: #efe4c6;
+  --ink: #2a2118;
+  --ink-soft: #66543f;
+  --line: #d6c7a1;
+  --brass: #b9862a;
+  --brass-light: #e4bf6a;
+  --danger: #a3301d;
+  --success: #2f6b3f;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  --radius-s: 4px;
+  --radius-m: 10px;
+  --radius-l: 18px;
+
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 60%) inset, 0 6px 18px rgb(6 24 18 / 35%);
+  --shadow-lift: 0 2px 6px rgb(6 24 18 / 30%);
+}
 
 *,
 *::before,
@@ -8,7 +38,150 @@ $font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
 body {
   margin: 0;
+  min-height: 100vh;
   font-family: $font-stack;
-  background: #f4f1ea;
-  color: #1f2328;
+  line-height: 1.45;
+  color: var(--ink);
+  background-color: var(--felt);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgb(255 255 255 / 8%), transparent 60%),
+    radial-gradient(ellipse at 50% 120%, var(--felt-deep), transparent 70%);
+  background-attachment: fixed;
+}
+
+main {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+h1,
+h2 {
+  margin: 0;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--brass-light);
+}
+
+form {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-radius: var(--radius-l);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+}
+
+form h2 {
+  margin-bottom: var(--space-2);
+  font-size: 1.375rem;
+}
+
+fieldset {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-m);
+}
+
+legend {
+  padding: 0 var(--space-2);
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+label {
+  margin-top: var(--space-1);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: #fffdf6;
+  color: var(--ink);
+}
+
+button {
+  justify-self: start;
+  padding: var(--space-2) var(--space-5);
+  border: 0;
+  border-radius: 999px;
+  background: var(--felt);
+  color: var(--felt-text);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--felt-deep);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+
+  &:hover:not(:disabled) {
+    background: #245a47;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--felt-deep);
+  }
+
+  &:disabled {
+    background: #b9b09a;
+    color: #4a4033;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+form button[type='submit'] {
+  margin-top: var(--space-3);
+}
+
+:focus-visible {
+  outline: 3px solid var(--brass-light);
+  outline-offset: 2px;
+}
+
+[role='alert'] {
+  padding: var(--space-2) var(--space-3);
+  border-left: 4px solid var(--danger);
+  border-radius: var(--radius-s);
+  background: #fbe3dc;
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

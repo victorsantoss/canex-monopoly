@@ -1,11 +1,33 @@
 .lobby {
-  max-width: 48rem;
-  margin: 0 auto;
-  padding: 1rem;
+  max-width: 56rem;
+  padding: var(--space-6) var(--space-4);
+}
+
+.title {
+  margin-bottom: var(--space-6);
+  color: var(--felt-text);
+  text-align: center;
+
+  h1 {
+    display: inline-block;
+    padding: var(--space-2) var(--space-6);
+    border: 3px solid var(--brass-light);
+    border-radius: var(--radius-m);
+    background: #a3301d;
+    color: #fff;
+    font-size: clamp(2rem, 7vw, 3.25rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    box-shadow:
+      0 0 0 4px var(--danger),
+      var(--shadow-card);
+    transform: rotate(-2deg);
+  }
 }
 
 .forms {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  align-items: start;
+  gap: var(--space-5);
 }

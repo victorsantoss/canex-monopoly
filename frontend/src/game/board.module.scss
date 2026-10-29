@@ -1,48 +1,170 @@
+@use 'sass:list';
+
+// Colour bands, cheapest group first, in the spirit of the classic street sets.
+$groups: (#7a4a2a, #3f86b0, #b63d78, #c9651c, #b8282c, #23457a);
+
+.table {
+  --gap: 4px;
+
+  position: relative;
+  padding: 0;
+  border-radius: var(--radius-m);
+  background: #cfe1cf;
+  box-shadow:
+    0 0 0 6px var(--paper),
+    0 0 0 8px var(--brass),
+    var(--shadow-card);
+}
+
 .board {
   display: grid;
-  gap: 4px;
+  grid-template-columns: repeat(var(--side), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--side), 1fr);
+  gap: var(--gap);
   margin: 0;
   padding: 0;
   list-style: none;
+
+  @media (min-width: 40rem) {
+    aspect-ratio: 1;
+  }
 }
 
 .square {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-height: 5.5rem;
-  padding: 4px;
-  border: 1px solid #b7b0a2;
-  border-top: 6px solid transparent;
-  background: #fffdf8;
-  font-size: 0.75rem;
+  min-width: 0;
+  min-height: 4.5rem;
+  padding: var(--space-1);
+  overflow: hidden;
+  border-radius: var(--radius-s);
+  background: var(--paper);
+  font-size: 0.625rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+
+  @media (min-width: 40rem) {
+    padding: var(--space-2);
+    font-size: 0.75rem;
+  }
+}
+
+.property {
+  padding-top: calc(var(--space-1) + 10px);
+
+  &::before {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 10px;
+    background: var(--band);
+    content: '';
+  }
+
+  @media (min-width: 40rem) {
+    padding-top: calc(var(--space-2) + 14px);
+
+    &::before {
+      height: 14px;
+    }
+  }
+}
+
+@for $i from 1 through list.length($groups) {
+  .group#{$i - 1} {
+    --band: #{list.nth($groups, $i)};
+  }
+}
+
+// The owner's colour frames the deed, so ownership reads at a glance across the table.
+.owned {
+  box-shadow: inset 0 0 0 3px var(--owner);
+  background: color-mix(in srgb, var(--owner) 10%, var(--paper));
+}
+
+.start {
+  background: var(--brass-light);
+
+  .name {
+    font-size: 1.1em;
+    font-weight: 800;
+  }
+}
+
+.empty {
+  background: repeating-linear-gradient(-45deg, var(--paper-sunk) 0 6px, var(--paper) 6px 12px);
+  color: var(--ink-soft);
+
+  .name {
+    font-weight: 500;
+  }
 }
 
 .name {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .prices {
-  color: #57606a;
+  color: var(--ink-soft);
 }
 
 .tokens {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 3px;
   margin-top: auto;
 }
 
 .token {
   display: inline-grid;
   place-items: center;
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid #fff;
   border-radius: 50%;
   color: #fff;
-  font-weight: 700;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: var(--shadow-lift);
 }
 
 .active {
-  outline: 3px solid #1f2328;
+  outline: 3px solid var(--ink);
+  outline-offset: 1px;
+  animation: bob 1.4s ease-in-out infinite;
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.centre {
+  position: absolute;
+  inset: calc((100% + var(--gap)) / var(--side));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  text-align: center;
+}
+
+.plate {
+  &::after {
+    display: inline-block;
+    padding: var(--space-1) var(--space-4);
+    border: 2px solid var(--brass-light);
+    border-radius: var(--radius-s);
+    background: var(--danger);
+    color: #fff;
+    font-size: clamp(0.9rem, 3.5vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    content: attr(data-code);
+    transform: rotate(-4deg);
+  }
 }

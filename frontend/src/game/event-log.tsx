@@ -1,5 +1,6 @@
 import type { LoggedEvent } from '../api/use-game-channel'
 import { describeEvent, type EventContext } from '../events/describe-event'
+import styles from './event-log.module.scss'
 
 interface EventLogProps {
   entries: LoggedEvent[]
@@ -15,7 +16,7 @@ export function EventLog({ entries, context }: EventLogProps) {
       {latestFirst.length === 0 ? (
         <p>Nothing happened yet.</p>
       ) : (
-        <ol>
+        <ol className={styles.timeline}>
           {latestFirst.map((entry) => (
             <li key={entry.id}>{describeEvent(entry.event, context)}</li>
           ))}
