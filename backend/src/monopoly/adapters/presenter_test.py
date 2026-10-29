@@ -18,6 +18,7 @@ from monopoly.domain.events import (
     TurnPassed,
 )
 from monopoly.domain.game import Game
+from monopoly.domain.rules import GameRules
 
 
 def started_game() -> Game:
@@ -39,8 +40,20 @@ def test_waiting_game_state() -> None:
     assert state["current_player_id"] is None
     assert state["winner_id"] is None
     assert state["players"] == [
-        {"id": "p1", "name": "Ana", "money": 1500, "position": 0, "is_bankrupt": False}
+        {"id": "p1", "name": "Ana", "money": 1000, "position": 0, "is_bankrupt": False}
     ]
+
+
+def test_state_shows_the_game_settings_and_rents_follow_them() -> None:
+    rules = GameRules(starting_money=2500, salary=120, rent_percent=50)
+    game = Game.create(code="GAME01", seats=2, rules=rules)
+
+    state = game_to_json(game)
+
+    assert state["settings"] == {"starting_money": 2500, "salary": 120, "rent_percent": 50}
+    board = state["board"]
+    assert isinstance(board, list)
+    assert board[1]["rent"] == 30
 
 
 def test_board_squares_carry_kind_price_rent_and_owner() -> None:
@@ -64,7 +77,7 @@ def test_board_squares_carry_kind_price_rent_and_owner() -> None:
         "kind": "property",
         "name": "Rue Ontario",
         "price": 60,
-        "rent": 30,
+        "rent": 60,
         "owner_id": "p1",
     }
     assert board[2] == {

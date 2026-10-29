@@ -11,6 +11,7 @@ from monopoly.application.ports import (
 )
 from monopoly.domain.events import GameEvent
 from monopoly.domain.game import Game
+from monopoly.domain.rules import GameRules
 
 
 @dataclass(frozen=True)
@@ -45,8 +46,14 @@ class GameService:
         self._codes = codes
         self._tokens = tokens
 
-    async def create_game(self, player_name: str, seats: int) -> JoinedGame:
-        return await self._seat(Game.create(code=self._new_code(), seats=seats), player_name)
+    async def create_game(
+        self,
+        player_name: str,
+        seats: int,
+        rules: GameRules = GameRules(),  # noqa: B008 - GameRules is frozen, sharing it is safe
+    ) -> JoinedGame:
+        game = Game.create(code=self._new_code(), seats=seats, rules=rules)
+        return await self._seat(game, player_name)
 
     async def join_game(self, code: str, player_name: str) -> JoinedGame:
         return await self._seat(self.get_game(code), player_name)

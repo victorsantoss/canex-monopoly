@@ -8,6 +8,7 @@ from monopoly.application.errors import GameNotFoundError, InvalidPlayerTokenErr
 from monopoly.domain.errors import (
     GameAlreadyStartedError,
     GameNotInProgressError,
+    InvalidGameSettingsError,
     InvalidPlayerNameError,
     InvalidSeatCountError,
     NotYourTurnError,
@@ -43,6 +44,7 @@ def build_client(error: Exception) -> TestClient:
         (GameNotInProgressError("not in progress"), 409),
         (InvalidSeatCountError("seats"), 422),
         (InvalidPlayerNameError("name"), 422),
+        (InvalidGameSettingsError("settings"), 422),
     ],
 )
 def test_errors_map_to_their_status_with_a_detail_message(
