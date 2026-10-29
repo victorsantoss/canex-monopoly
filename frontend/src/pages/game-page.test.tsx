@@ -1,7 +1,7 @@
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { joinGame } from '../api/game-api'
+import { ApiError, joinGame, playTurn } from '../api/game-api'
 import { loadPlayerSession, savePlayerSession } from '../session/player-session'
 import { FakeWebSocket } from '../test-support/fake-web-socket'
 import { makePlayer, makeState } from '../test-support/game-fixtures'
@@ -13,7 +13,9 @@ vi.mock('../api/game-api', async (importOriginal) => {
   return { ...original, joinGame: vi.fn(), playTurn: vi.fn() }
 })
 
-function renderGamePage(code = 'K7Q2XA') {
+function renderGamePage(code = 'K7Q2XA', fragment = '') {
+  // The page reads the fragment from the real address bar, as it does under BrowserRouter in the app.
+  window.history.replaceState(null, '', `/games/${code}${fragment}`)
   render(
     <MemoryRouter initialEntries={[`/games/${code}`]}>
       <Routes>
@@ -31,6 +33,7 @@ describe('GamePage', () => {
   beforeEach(() => {
     sessionStorage.clear()
     vi.mocked(joinGame).mockReset()
+    vi.mocked(playTurn).mockReset()
     FakeWebSocket.instances = []
     vi.stubGlobal('WebSocket', FakeWebSocket)
   })
@@ -101,5 +104,47 @@ describe('GamePage', () => {
     act(() => FakeWebSocket.latest().serverClose(4404))
 
     expect(screen.getByText('This game does not exist.')).toBeInTheDocument()
+  })
+
+  it('takes the seat back from a resume link and removes it from the address bar', () => {
+    renderGamePage('K7Q2XA', '#player=p1&token=secret-1')
+
+    expect(loadPlayerSession('K7Q2XA')).toEqual({ playerId: 'p1', playerToken: 'secret-1' })
+    expect(window.location.hash).toBe('')
+    expect(window.location.pathname).toBe('/games/K7Q2XA')
+    expect(screen.queryByRole('heading', { name: 'Join game K7Q2XA' })).not.toBeInTheDocument()
+    expect(FakeWebSocket.instances).toHaveLength(1)
+  })
+
+  it('offers to join when the resume link is incomplete', () => {
+    renderGamePage('K7Q2XA', '#player=p1')
+
+    expect(screen.getByRole('heading', { name: 'Join game K7Q2XA' })).toBeInTheDocument()
+    expect(loadPlayerSession('K7Q2XA')).toBeNull()
+  })
+
+  it('gives a seated player a private resume link', () => {
+    savePlayerSession('K7Q2XA', { playerId: 'p1', playerToken: 'secret-1' })
+    renderGamePage()
+
+    pushState(makeState())
+
+    const resume = screen.getByRole('region', { name: 'Private link' })
+    expect(resume).toHaveTextContent("Anyone with it can play as you; don't share it.")
+    expect(within(resume).getByLabelText('Resume link')).toHaveValue(
+      `${location.origin}/games/K7Q2XA#player=p1&token=secret-1`,
+    )
+  })
+
+  it('forgets a seat whose token the server rejects and offers to join again', async () => {
+    vi.mocked(playTurn).mockRejectedValue(new ApiError(401, 'Invalid player token'))
+    savePlayerSession('K7Q2XA', { playerId: 'p1', playerToken: 'stale' })
+    renderGamePage()
+    pushState(makeState({ current_player_id: 'p1' }))
+
+    await userEvent.click(screen.getByRole('button', { name: 'Roll the die' }))
+
+    expect(await screen.findByRole('heading', { name: 'Join game K7Q2XA' })).toBeInTheDocument()
+    expect(loadPlayerSession('K7Q2XA')).toBeNull()
   })
 })
