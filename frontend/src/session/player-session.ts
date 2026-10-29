@@ -5,8 +5,7 @@ export interface PlayerSession {
   playerToken: string
 }
 
-// sessionStorage (not localStorage): two tabs of the same browser can hold two different seats,
-// and a reload keeps the seat.
+// sessionStorage, not localStorage: two tabs of one browser can hold two different seats.
 const keyFor = (code: string): string => `monopoly.session.${code}`
 
 function isPlayerSession(value: unknown): value is PlayerSession {

@@ -1,5 +1,3 @@
-"""Randomness adapters, all backed by `secrets`: codes and tokens must not be guessable."""
-
 import secrets
 
 # No 0/O nor 1/I, so a code read aloud or copied by hand is not mistyped.

@@ -7,7 +7,6 @@ from fastapi.responses import JSONResponse
 from monopoly.application.errors import GameNotFoundError, InvalidPlayerTokenError
 from monopoly.domain.errors import (
     GameAlreadyStartedError,
-    GameFullError,
     GameNotInProgressError,
     InvalidPlayerNameError,
     InvalidSeatCountError,
@@ -19,7 +18,6 @@ ERROR_STATUS: dict[type[Exception], int] = {
     NotYourTurnError: HTTPStatus.FORBIDDEN,
     GameNotFoundError: HTTPStatus.NOT_FOUND,
     GameAlreadyStartedError: HTTPStatus.CONFLICT,
-    GameFullError: HTTPStatus.CONFLICT,
     GameNotInProgressError: HTTPStatus.CONFLICT,
     InvalidSeatCountError: HTTPStatus.UNPROCESSABLE_ENTITY,
     InvalidPlayerNameError: HTTPStatus.UNPROCESSABLE_ENTITY,

@@ -5,8 +5,6 @@ from monopoly.main import create_app
 
 
 class FixedDice:
-    """Always rolls the same value, so scenarios know where the active player lands."""
-
     def __init__(self, value: int) -> None:
         self._value = value
 

@@ -14,12 +14,11 @@ import { parseResumeFragment } from '../session/resume-link'
 export function GamePage() {
   const { code } = useParams()
   if (code === undefined) return <Navigate to="/" replace />
-  // Keyed by code so that following a link to another game reloads that game's seat.
+  // Keyed by code so that following a link to another game loads that game's seat.
   return <GameForCode key={code} code={code.toUpperCase()} />
 }
 
-// A resume link carries the seat in the fragment; it is stored like any other seat and removed from
-// the address bar at once, so the token does not linger in history or get copied along with the URL.
+// Stripped from the address bar at once so the token neither lingers in history nor gets copied along.
 function adoptSeatFromFragment(code: string): void {
   const seat = parseResumeFragment(window.location.hash)
   if (seat === null) return
@@ -47,7 +46,7 @@ function GameForCode({ code }: { code: string }) {
   if (session === null) {
     return (
       <main>
-        <JoinGameForm code={code} onJoined={takeSeat} />
+        <JoinGameForm codeFromLink={code} onJoined={takeSeat} />
       </main>
     )
   }

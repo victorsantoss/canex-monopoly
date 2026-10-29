@@ -1,5 +1,5 @@
 class GameError(Exception):
-    """Base class for every rule violation raised by the domain."""
+    pass
 
 
 class InvalidSeatCountError(GameError):
@@ -7,10 +7,6 @@ class InvalidSeatCountError(GameError):
 
 
 class InvalidPlayerNameError(GameError):
-    pass
-
-
-class GameFullError(GameError):
     pass
 
 

@@ -1,5 +1,3 @@
-"""Acceptance scenarios for the domain rules (docs/spec.md, section 4, "Domain rules")."""
-
 import pytest
 
 from monopoly.domain.board import STANDARD_BOARD, Board, EmptySquare, PropertySquare, StartSquare

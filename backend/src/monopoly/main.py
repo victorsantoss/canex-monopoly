@@ -1,5 +1,3 @@
-"""Composition root: the only place that wires adapters into the use cases."""
-
 from collections.abc import Mapping
 
 from fastapi import FastAPI

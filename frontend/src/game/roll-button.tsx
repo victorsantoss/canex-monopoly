@@ -18,8 +18,7 @@ export function RollButton({ state, session, onSeatRejected }: RollButtonProps) 
     setPending(true)
     setError(null)
     try {
-      // The response is ignored on purpose: the same state and events reach every player,
-      // this one included, through the game channel, so there is a single source of updates.
+      // Response ignored on purpose: the game channel is the single source of updates, for this player too.
       await playTurn(state.code, session.playerToken)
     } catch (reason) {
       if (reason instanceof ApiError && reason.status === 401) {

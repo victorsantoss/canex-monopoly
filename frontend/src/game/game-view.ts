@@ -1,7 +1,5 @@
 import type { GameState, PlayerId, PlayerView } from '../api/types'
 
-// Presentation helpers only: every game rule is applied by the server.
-
 export function isMyTurn(state: GameState, playerId: PlayerId): boolean {
   return state.status === 'in_progress' && state.current_player_id === playerId
 }
@@ -18,7 +16,7 @@ export interface GridCell {
   column: number
 }
 
-// Lays the squares clockwise around the edge of a square grid, Start in the top-left corner.
+// Clockwise around the edge of a square grid, Start in the top-left corner.
 export function ringCell(index: number, boardSize: number): GridCell {
   const side = boardSize / 4
   const last = side + 1

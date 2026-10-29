@@ -1,10 +1,3 @@
-"""Use cases of the game.
-
-Commands never `await` between loading and saving a game: on a single event loop this keeps two
-commands on the same game from interleaving without a lock. Only the notification, which runs
-after the save, is awaited.
-"""
-
 from dataclasses import dataclass
 
 from monopoly.application.errors import GameNotFoundError, InvalidPlayerTokenError
@@ -33,6 +26,8 @@ class TurnResult:
     events: list[GameEvent]
 
 
+# Commands never `await` between loading and saving a game: on a single event loop, that keeps two
+# commands on the same game from interleaving without a lock.
 class GameService:
     def __init__(
         self,
@@ -51,16 +46,10 @@ class GameService:
         self._tokens = tokens
 
     async def create_game(self, player_name: str, seats: int) -> JoinedGame:
-        game = Game.create(code=self._new_code(), seats=seats)
-        joined, events = self._seat(game, player_name)
-        await self._notifier.notify(game, events)
-        return joined
+        return await self._seat(Game.create(code=self._new_code(), seats=seats), player_name)
 
     async def join_game(self, code: str, player_name: str) -> JoinedGame:
-        game = self.get_game(code)
-        joined, events = self._seat(game, player_name)
-        await self._notifier.notify(game, events)
-        return joined
+        return await self._seat(self.get_game(code), player_name)
 
     async def play_turn(self, code: str, player_token: str) -> TurnResult:
         game = self.get_game(code)
@@ -78,12 +67,13 @@ class GameService:
             raise GameNotFoundError(f"Game {code!r} not found.")
         return game
 
-    def _seat(self, game: Game, player_name: str) -> tuple[JoinedGame, list[GameEvent]]:
+    async def _seat(self, game: Game, player_name: str) -> JoinedGame:
         player, events = game.join(player_name)
         token = self._tokens.new_token()
         self._repository.save(game)
         self._seats.register(game.code, player.id, token)
-        return JoinedGame(code=game.code, player_id=player.id, player_token=token), events
+        await self._notifier.notify(game, events)
+        return JoinedGame(code=game.code, player_id=player.id, player_token=token)
 
     def _new_code(self) -> str:
         code = self._codes.new_code()

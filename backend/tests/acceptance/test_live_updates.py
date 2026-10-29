@@ -1,5 +1,3 @@
-"""Acceptance scenarios for live updates (docs/spec.md, section 4, "Live updates")."""
-
 from fastapi.testclient import TestClient
 
 

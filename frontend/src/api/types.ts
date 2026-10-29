@@ -1,5 +1,4 @@
-// Shapes of the API contract (docs/api.md). Field names stay in snake_case on purpose:
-// they mirror the wire format, so no mapping layer can drift from the server.
+// snake_case on purpose: mirroring the wire format leaves no mapping layer to drift from the server.
 
 export type PlayerId = string
 

@@ -1,6 +1,6 @@
 import type { GameState, PlayerView, Square } from '../api/types'
 
-export function makeBoard(): Square[] {
+function makeBoard(): Square[] {
   return Array.from({ length: 16 }, (_, index): Square => {
     if (index === 0) {
       return { index, kind: 'start', name: 'Start', price: null, rent: null, owner_id: null }

@@ -1,7 +1,7 @@
 from collections.abc import Mapping
 
 import pytest
-from fastapi import FastAPI, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.testclient import TestClient
 
 from monopoly.adapters.realtime.websocket_hub import WebSocketHub
@@ -77,12 +77,22 @@ def test_clients_of_the_same_game_receive_its_broadcasts_and_no_other() -> None:
         assert other_game.receive_json() == update_message("ZZZ999")
 
 
+class RecordingHub(WebSocketHub):
+    def __init__(self) -> None:
+        super().__init__()
+        self.disconnected: list[str] = []
+
+    def disconnect(self, code: str, websocket: WebSocket) -> None:
+        self.disconnected.append(code)
+        super().disconnect(code, websocket)
+
+
 def test_socket_is_unregistered_when_the_client_disconnects() -> None:
-    hub = WebSocketHub()
+    hub = RecordingHub()
     client = build_client(hub)
 
     with client.websocket_connect("/ws/games/ABC123") as socket:
         socket.receive_json()
-        assert hub.connection_count("ABC123") == 1
+        assert hub.disconnected == []
 
-    assert hub.connection_count("ABC123") == 0
+    assert hub.disconnected == ["ABC123"]
