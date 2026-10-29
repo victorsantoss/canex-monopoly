@@ -36,7 +36,13 @@ class GameStatus(StrEnum):
 
 
 class Game:
-    def __init__(self, code: str, seats: int, board: Board, rules: GameRules) -> None:
+    def __init__(
+        self,
+        code: str,
+        seats: int,
+        board: Board = STANDARD_BOARD,
+        rules: GameRules = GameRules(),  # noqa: B008 - GameRules is frozen, sharing it is safe
+    ) -> None:
         if not rules.min_seats <= seats <= rules.max_seats:
             raise InvalidSeatCountError(
                 f"Seats must be between {rules.min_seats} and {rules.max_seats}, got {seats}."
@@ -50,16 +56,6 @@ class Game:
         self._owners: dict[int, str] = {}
         self._current_index: int | None = None
         self._winner_id: str | None = None
-
-    @classmethod
-    def create(
-        cls,
-        code: str,
-        seats: int,
-        board: Board = STANDARD_BOARD,
-        rules: GameRules = GameRules(),  # noqa: B008 - GameRules is frozen, sharing it is safe
-    ) -> "Game":
-        return cls(code=code, seats=seats, board=board, rules=rules)
 
     @property
     def code(self) -> str:

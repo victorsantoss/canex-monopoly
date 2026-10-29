@@ -52,7 +52,7 @@ class GameService:
         seats: int,
         rules: GameRules = GameRules(),  # noqa: B008 - GameRules is frozen, sharing it is safe
     ) -> JoinedGame:
-        game = Game.create(code=self._new_code(), seats=seats, rules=rules)
+        game = Game(code=self._new_code(), seats=seats, rules=rules)
         return await self._seat(game, player_name)
 
     async def join_game(self, code: str, player_name: str) -> JoinedGame:

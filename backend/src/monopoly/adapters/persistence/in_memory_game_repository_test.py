@@ -4,7 +4,7 @@ from monopoly.domain.game import Game
 
 def test_returns_a_saved_game_by_code_and_none_otherwise() -> None:
     repository = InMemoryGameRepository()
-    game = Game.create(code="GAME01", seats=2)
+    game = Game(code="GAME01", seats=2)
 
     repository.save(game)
 

@@ -32,7 +32,7 @@ def start_game(
     board: Board = STANDARD_BOARD,
     rules: GameRules | None = None,
 ) -> Game:
-    game = Game.create(code="ABCDEF", seats=seats, board=board, rules=rules or GameRules())
+    game = Game(code="ABCDEF", seats=seats, board=board, rules=rules or GameRules())
     for name in ["Ana", "Bob", "Cleo", "Dan"][:seats]:
         game.join(name)
     return game
@@ -139,7 +139,7 @@ def test_last_player_standing_wins_and_the_game_is_finished() -> None:
 
 
 def test_guards_only_the_active_player_plays_and_only_while_in_progress() -> None:
-    waiting = Game.create(code="ABCDEF", seats=2)
+    waiting = Game(code="ABCDEF", seats=2)
     waiting.join("Ana")
     with pytest.raises(GameNotInProgressError):
         waiting.play_turn("p1", 1)

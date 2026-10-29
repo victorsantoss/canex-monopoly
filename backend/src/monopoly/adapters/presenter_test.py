@@ -22,14 +22,14 @@ from monopoly.domain.rules import GameRules
 
 
 def started_game() -> Game:
-    game = Game.create(code="GAME01", seats=2)
+    game = Game(code="GAME01", seats=2)
     game.join("Ana")
     game.join("Bob")
     return game
 
 
 def test_waiting_game_state() -> None:
-    game = Game.create(code="GAME01", seats=3)
+    game = Game(code="GAME01", seats=3)
     game.join("Ana")
 
     state = game_to_json(game)
@@ -46,7 +46,7 @@ def test_waiting_game_state() -> None:
 
 def test_state_shows_the_game_settings_and_rents_follow_them() -> None:
     rules = GameRules(starting_money=2500, salary=120, rent_percent=50)
-    game = Game.create(code="GAME01", seats=2, rules=rules)
+    game = Game(code="GAME01", seats=2, rules=rules)
 
     state = game_to_json(game)
 
