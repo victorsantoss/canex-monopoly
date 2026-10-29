@@ -1,6 +1,7 @@
 """Acceptance scenarios for the domain rules (docs/spec.md, section 4, "Domain rules")."""
 
 import pytest
+
 from monopoly.domain.board import STANDARD_BOARD, Board, EmptySquare, PropertySquare, StartSquare
 from monopoly.domain.errors import GameNotInProgressError, NotYourTurnError
 from monopoly.domain.events import (
