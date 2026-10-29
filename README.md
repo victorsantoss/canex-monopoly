@@ -1,5 +1,7 @@
 # Monopoly — simplified, multiplayer
 
+[![CI](https://github.com/victorsantoss/canex-monopoly/actions/workflows/ci.yml/badge.svg)](https://github.com/victorsantoss/canex-monopoly/actions/workflows/ci.yml)
+
 A simplified Monopoly played by 2 to 4 players, each from their own browser, with live updates.
 Backend in Python + FastAPI, frontend in React + TypeScript (+ Sass).
 
@@ -16,7 +18,8 @@ Prerequisites: Python 3.11+, Node.js 20+ (LTS recommended).
 cd backend
 python -m venv .venv
 # Windows: .venv\Scripts\activate    macOS/Linux: source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -r requirements-dev.lock   # pinned runtime + dev dependencies
+pip install -e . --no-deps
 uvicorn monopoly.main:app --reload --port 8000
 ```
 
@@ -42,7 +45,7 @@ screen (the token travels in the URL fragment, never sent to the server).
 ```bash
 # backend/
 pytest -q              # unit tests (next to the code) + acceptance tests (tests/acceptance)
-ruff check . && ruff format --check .
+ruff check . scripts && ruff format --check .
 mypy                   # strict
 
 # frontend/
@@ -51,6 +54,14 @@ npm run typecheck
 npm run lint
 npm run build
 ```
+
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs the same gate on every pull
+request and every push to `main`.
+
+Backend dependencies are pinned in `backend/requirements.lock` (runtime) and
+`backend/requirements-dev.lock` (runtime + dev), compiled from `pyproject.toml` with pip-tools.
+After changing `pyproject.toml`, refresh both from `backend/` with
+`pip-compile --strip-extras -o requirements.lock pyproject.toml && pip-compile --strip-extras --extra dev -o requirements-dev.lock pyproject.toml`.
 
 ## How the work was organised
 
