@@ -80,8 +80,7 @@ export function useGameChannel(code: string, { reconnectDelayMs = 1500 }: GameCh
           setNotFound(true)
           return
         }
-        // The server pushes a full snapshot on every connection, so reconnecting is enough
-        // to resynchronise; events missed while offline are simply absent from the log.
+        // Each connection starts with a full snapshot, so reconnecting resyncs; missed events are not replayed.
         setConnectionStatus('reconnecting')
         reconnectTimer = setTimeout(() => {
           setConnectionStatus('connecting')

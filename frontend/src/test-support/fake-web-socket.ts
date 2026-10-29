@@ -1,4 +1,3 @@
-// Minimal stand-in for the browser WebSocket: tests drive the server side by hand.
 export class FakeWebSocket {
   static instances: FakeWebSocket[] = []
 

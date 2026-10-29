@@ -1,7 +1,6 @@
 import type { PlayerSession } from './player-session'
 
-// The seat travels in the fragment, never in the query string: browsers do not send fragments to the
-// server, so the token stays out of access/proxy logs and out of the Referer header.
+// Fragment, not query string: browsers never send it, so the token stays out of server logs and Referer.
 export function buildResumeLink(code: string, session: PlayerSession): string {
   const fragment = new URLSearchParams({ player: session.playerId, token: session.playerToken })
   return `${location.origin}/games/${code}#${fragment.toString()}`
