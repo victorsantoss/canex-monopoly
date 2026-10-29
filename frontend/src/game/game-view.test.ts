@@ -1,5 +1,5 @@
 import { makePlayer, makeState } from '../test-support/game-fixtures'
-import { isMyTurn, playerColor } from './game-view'
+import { isMyTurn, playerColor, ringCell } from './game-view'
 
 describe('isMyTurn', () => {
   it('is true when the game is in progress and I am the current player', () => {
@@ -12,6 +12,19 @@ describe('isMyTurn', () => {
 
   it.each(['waiting', 'finished'] as const)('is false while the game is %s', (status) => {
     expect(isMyTurn(makeState({ status, current_player_id: 'p1' }), 'p1')).toBe(false)
+  })
+})
+
+describe('ringCell', () => {
+  it.each([
+    [0, { row: 1, column: 1 }],
+    [4, { row: 1, column: 5 }],
+    [6, { row: 3, column: 5 }],
+    [8, { row: 5, column: 5 }],
+    [12, { row: 5, column: 1 }],
+    [15, { row: 2, column: 1 }],
+  ])('places square %i of a 16-square board clockwise on a 5x5 ring', (index, cell) => {
+    expect(ringCell(index, 16)).toEqual(cell)
   })
 })
 

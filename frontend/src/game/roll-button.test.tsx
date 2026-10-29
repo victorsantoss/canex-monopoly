@@ -14,7 +14,9 @@ const playTurnMock = vi.mocked(playTurn)
 const session = { playerId: 'p1', playerToken: 'secret' }
 
 describe('RollButton', () => {
-  beforeEach(() => playTurnMock.mockReset())
+  beforeEach(() => {
+    playTurnMock.mockReset()
+  })
 
   it('is enabled on my turn', () => {
     render(<RollButton state={makeState({ current_player_id: 'p1' })} session={session} />)

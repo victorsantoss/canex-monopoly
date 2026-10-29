@@ -12,6 +12,10 @@ export class ApiError extends Error {
   }
 }
 
+export function errorMessage(error: unknown): string {
+  return error instanceof ApiError ? error.detail : 'Could not reach the server. Please try again.'
+}
+
 async function readDetail(response: Response): Promise<string> {
   try {
     const body: unknown = await response.json()
