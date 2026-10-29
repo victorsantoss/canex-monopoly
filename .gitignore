@@ -22,3 +22,4 @@ dist/
 
 # Local agent worktrees
 .claude/
+.playwright-mcp/
