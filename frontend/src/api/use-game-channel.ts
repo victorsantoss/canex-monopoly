@@ -47,6 +47,7 @@ function parseMessage(data: unknown): GameUpdatedMessage | null {
   return null
 }
 
+// State is not reset when `code` changes: render the consumer with `key={code}` to watch another game.
 export function useGameChannel(code: string, { reconnectDelayMs = 1500 }: GameChannelOptions = {}): GameChannel {
   const [state, setState] = useState<GameState | null>(null)
   const [eventLog, setEventLog] = useState<LoggedEvent[]>([])
@@ -59,12 +60,7 @@ export function useGameChannel(code: string, { reconnectDelayMs = 1500 }: GameCh
     let reconnectTimer: ReturnType<typeof setTimeout> | undefined
     let nextEventId = 0
 
-    setState(null)
-    setEventLog([])
-    setNotFound(false)
-
     const connect = (): void => {
-      setConnectionStatus('connecting')
       socket = new WebSocket(channelUrl(code))
       socket.onopen = () => {
         if (!disposed) setConnectionStatus('open')
@@ -87,7 +83,10 @@ export function useGameChannel(code: string, { reconnectDelayMs = 1500 }: GameCh
         // The server pushes a full snapshot on every connection, so reconnecting is enough
         // to resynchronise; events missed while offline are simply absent from the log.
         setConnectionStatus('reconnecting')
-        reconnectTimer = setTimeout(connect, reconnectDelayMs)
+        reconnectTimer = setTimeout(() => {
+          setConnectionStatus('connecting')
+          connect()
+        }, reconnectDelayMs)
       }
     }
 
