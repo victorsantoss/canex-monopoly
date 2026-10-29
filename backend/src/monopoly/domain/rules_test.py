@@ -10,6 +10,10 @@ def test_default_economy() -> None:
     assert (rules.starting_money, rules.salary, rules.rent_percent) == (1000, 50, 100)
 
 
+def test_player_names_are_limited_to_20_characters_by_default() -> None:
+    assert GameRules().max_player_name_length == 20
+
+
 @pytest.mark.parametrize(
     ("rent_percent", "price", "rent"),
     [(100, 60, 60), (50, 60, 30), (200, 350, 700), (10, 60, 6), (33, 100, 33), (15, 70, 10)],

@@ -1,3 +1,4 @@
+from dataclasses import replace
 from enum import StrEnum
 
 from monopoly.domain.board import STANDARD_BOARD, Board, PropertySquare
@@ -27,8 +28,6 @@ from monopoly.domain.events import (
 from monopoly.domain.player import Player
 from monopoly.domain.rules import GameRules
 
-MAX_PLAYER_NAME_LENGTH = 20
-
 
 class GameStatus(StrEnum):
     WAITING = "waiting"
@@ -38,6 +37,10 @@ class GameStatus(StrEnum):
 
 class Game:
     def __init__(self, code: str, seats: int, board: Board, rules: GameRules) -> None:
+        if not rules.min_seats <= seats <= rules.max_seats:
+            raise InvalidSeatCountError(
+                f"Seats must be between {rules.min_seats} and {rules.max_seats}, got {seats}."
+            )
         self._code = code
         self._seats = seats
         self._board = board
@@ -56,10 +59,6 @@ class Game:
         board: Board = STANDARD_BOARD,
         rules: GameRules = GameRules(),  # noqa: B008 - GameRules is frozen, sharing it is safe
     ) -> "Game":
-        if not rules.min_seats <= seats <= rules.max_seats:
-            raise InvalidSeatCountError(
-                f"Seats must be between {rules.min_seats} and {rules.max_seats}, got {seats}."
-            )
         return cls(code=code, seats=seats, board=board, rules=rules)
 
     @property
@@ -111,10 +110,9 @@ class Game:
         if self._status is not GameStatus.WAITING:
             raise GameAlreadyStartedError("The game has already started.")
         name = player_name.strip()
-        if not 1 <= len(name) <= MAX_PLAYER_NAME_LENGTH:
-            raise InvalidPlayerNameError(
-                f"Player name must be 1 to {MAX_PLAYER_NAME_LENGTH} characters."
-            )
+        max_length = self._rules.max_player_name_length
+        if not 1 <= len(name) <= max_length:
+            raise InvalidPlayerNameError(f"Player name must be 1 to {max_length} characters.")
 
         player = Player(
             id=f"p{len(self._players) + 1}", name=name, money=self._rules.starting_money
@@ -128,78 +126,85 @@ class Game:
         return player, events
 
     def play_turn(self, player_id: str, roll: int) -> list[GameEvent]:
-        player = self._ensure_can_play(player_id)
+        self._ensure_can_play(player_id)
         if not 1 <= roll <= self._rules.die_faces:
             raise InvalidRollError(f"A roll must be between 1 and {self._rules.die_faces}.")
 
-        events: list[GameEvent] = [DiceRolled(player_id=player.id, value=roll)]
-        events += self._move(player, roll)
-        events += self._resolve_square(player)
+        events: list[GameEvent] = [DiceRolled(player_id=player_id, value=roll)]
+        events += self._move(player_id, roll)
+        events += self._resolve_square(player_id)
         events += self._end_turn()
         return events
 
-    def _ensure_can_play(self, player_id: str) -> Player:
+    def _ensure_can_play(self, player_id: str) -> None:
         if self._status is not GameStatus.IN_PROGRESS:
             raise GameNotInProgressError("The game is not in progress.")
         player = self.player(player_id)
-        if player is not self.current_player:
+        current = self.current_player
+        if current is None or current.id != player.id:
             raise NotYourTurnError(f"It is not {player.name}'s turn.")
-        return player
 
-    def _move(self, player: Player, roll: int) -> list[GameEvent]:
-        from_position = player.position
+    def _save(self, updated: Player) -> None:
+        index = next(i for i, candidate in enumerate(self._players) if candidate.id == updated.id)
+        self._players[index] = updated
+
+    def _move(self, player_id: str, roll: int) -> list[GameEvent]:
+        from_position = self.player(player_id).position
         distance_from_start = from_position + roll
-        player.position = distance_from_start % self._board.size
+        to_position = distance_from_start % self._board.size
+        self._save(replace(self.player(player_id), position=to_position))
         events: list[GameEvent] = [
-            PlayerMoved(
-                player_id=player.id, from_position=from_position, to_position=player.position
-            )
+            PlayerMoved(player_id=player_id, from_position=from_position, to_position=to_position)
         ]
         reached_start = distance_from_start >= self._board.size
         if reached_start:
-            player.money += self._rules.salary
-            events.append(SalaryReceived(player_id=player.id, amount=self._rules.salary))
+            player = self.player(player_id)
+            self._save(replace(player, money=player.money + self._rules.salary))
+            events.append(SalaryReceived(player_id=player_id, amount=self._rules.salary))
         return events
 
-    def _resolve_square(self, player: Player) -> list[GameEvent]:
-        index = player.position
+    def _resolve_square(self, player_id: str) -> list[GameEvent]:
+        index = self.player(player_id).position
         square = self._board.square_at(index)
         if not isinstance(square, PropertySquare):
             return []
         owner_id = self._owners.get(index)
         if owner_id is None:
-            return self._buy(player, index, square)
-        if owner_id == player.id:
+            return self._buy(player_id, index, square)
+        if owner_id == player_id:
             return []
-        return self._pay_rent(player, self.player(owner_id), index, square)
+        return self._pay_rent(player_id, owner_id, index, square)
 
-    def _buy(self, player: Player, index: int, square: PropertySquare) -> list[GameEvent]:
+    def _buy(self, player_id: str, index: int, square: PropertySquare) -> list[GameEvent]:
+        player = self.player(player_id)
         if player.money < square.price:
-            return [PropertyUnaffordable(player_id=player.id, square_index=index)]
-        player.money -= square.price
-        self._owners[index] = player.id
-        return [PropertyBought(player_id=player.id, square_index=index, price=square.price)]
+            return [PropertyUnaffordable(player_id=player_id, square_index=index)]
+        self._save(replace(player, money=player.money - square.price))
+        self._owners[index] = player_id
+        return [PropertyBought(player_id=player_id, square_index=index, price=square.price)]
 
     def _pay_rent(
-        self, player: Player, owner: Player, index: int, square: PropertySquare
+        self, player_id: str, owner_id: str, index: int, square: PropertySquare
     ) -> list[GameEvent]:
         rent = self._rules.rent_for(square.price)
+        player = self.player(player_id)
         amount = min(rent, player.money)
-        player.money -= amount
-        owner.money += amount
+        self._save(replace(player, money=player.money - amount))
+        owner = self.player(owner_id)
+        self._save(replace(owner, money=owner.money + amount))
         events: list[GameEvent] = [
-            RentPaid(player_id=player.id, owner_id=owner.id, square_index=index, amount=amount)
+            RentPaid(player_id=player_id, owner_id=owner_id, square_index=index, amount=amount)
         ]
         if amount < rent:
-            events += self._bankrupt(player, creditor=owner)
+            events += self._bankrupt(player_id, creditor_id=owner_id)
         return events
 
-    def _bankrupt(self, player: Player, creditor: Player) -> list[GameEvent]:
-        player.is_bankrupt = True
+    def _bankrupt(self, player_id: str, creditor_id: str) -> list[GameEvent]:
+        self._save(replace(self.player(player_id), is_bankrupt=True))
         self._owners = {
-            index: owner_id for index, owner_id in self._owners.items() if owner_id != player.id
+            index: owner_id for index, owner_id in self._owners.items() if owner_id != player_id
         }
-        return [PlayerBankrupted(player_id=player.id, creditor_id=creditor.id)]
+        return [PlayerBankrupted(player_id=player_id, creditor_id=creditor_id)]
 
     def _end_turn(self) -> list[GameEvent]:
         remaining = [candidate for candidate in self._players if not candidate.is_bankrupt]
