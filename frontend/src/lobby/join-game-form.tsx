@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { errorMessage, joinGame } from '../api/game-api'
 import type { JoinedGame } from '../api/types'
+import { loadPlayerSession } from '../session/player-session'
 
 interface JoinGameFormProps {
   codeFromLink?: string
@@ -15,10 +16,18 @@ export function JoinGameForm({ codeFromLink, onJoined }: JoinGameFormProps) {
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
+    const code = codeFromLink ?? typedCode.trim().toUpperCase()
+    // Joining again would take a second seat and overwrite the stored one, leaving the first
+    // seat unplayable and the game stuck on its turn.
+    const heldSeat = loadPlayerSession(code)
+    if (heldSeat !== null) {
+      onJoined({ code, player_id: heldSeat.playerId, player_token: heldSeat.playerToken })
+      return
+    }
     setPending(true)
     setError(null)
     try {
-      onJoined(await joinGame(codeFromLink ?? typedCode.trim().toUpperCase(), name.trim()))
+      onJoined(await joinGame(code, name.trim()))
     } catch (reason) {
       setError(errorMessage(reason))
       setPending(false)

@@ -1,6 +1,8 @@
+from dataclasses import FrozenInstanceError
+
 import pytest
 
-from monopoly.domain.board import Board, EmptySquare, PropertySquare, StartSquare
+from monopoly.domain.board import STANDARD_BOARD, Board, EmptySquare, PropertySquare, StartSquare
 from monopoly.domain.errors import (
     GameAlreadyStartedError,
     GameError,
@@ -67,6 +69,34 @@ def test_create_returns_a_waiting_game_without_players() -> None:
 def test_create_rejects_seat_count_outside_rules(seats: int) -> None:
     with pytest.raises(InvalidSeatCountError):
         Game.create(code="ABCDEF", seats=seats)
+
+
+@pytest.mark.parametrize("seats", [1, 99])
+def test_constructor_rejects_seat_count_outside_rules(seats: int) -> None:
+    with pytest.raises(InvalidSeatCountError):
+        Game(code="ABCDEF", seats=seats, board=STANDARD_BOARD, rules=GameRules())
+
+
+def test_players_obtained_from_the_game_cannot_be_mutated() -> None:
+    game = new_game()
+
+    with pytest.raises(FrozenInstanceError):
+        game.player("p1").money = 0  # type: ignore[misc]
+    with pytest.raises(FrozenInstanceError):
+        game.players[0].position = 3  # type: ignore[misc]
+    current = game.current_player
+    assert current is not None
+    with pytest.raises(FrozenInstanceError):
+        current.is_bankrupt = True  # type: ignore[misc]
+    assert game.player("p1").money == 1000
+
+
+def test_name_length_limit_comes_from_the_rules() -> None:
+    game = Game.create(code="ABCDEF", seats=2, rules=GameRules(max_player_name_length=3))
+
+    game.join("Ana")
+    with pytest.raises(InvalidPlayerNameError):
+        game.join("Bruno")
 
 
 def test_domain_errors_share_a_base_class() -> None:

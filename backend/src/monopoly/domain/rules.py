@@ -15,6 +15,7 @@ class GameRules:
     min_seats: int = 2
     max_seats: int = 4
     die_faces: int = 6
+    max_player_name_length: int = 20
 
     # Bounds only limit what a game creator may choose; tests and simulations build GameRules
     # directly to explore any economy.
