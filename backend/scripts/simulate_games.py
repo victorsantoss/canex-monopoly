@@ -11,7 +11,7 @@ PLAYER_NAMES = ["Ana", "Bob", "Cleo", "Dan"]
 
 
 def play_game(seats: int, rules: GameRules, turn_cap: int, rng: random.Random) -> int | None:
-    game = Game.create(code="SIMULA", seats=seats, rules=rules)
+    game = Game(code="SIMULA", seats=seats, rules=rules)
     for name in PLAYER_NAMES[:seats]:
         game.join(name)
     for turn in range(1, turn_cap + 1):

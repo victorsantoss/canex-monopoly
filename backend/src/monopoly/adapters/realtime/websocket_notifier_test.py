@@ -17,7 +17,7 @@ class RecordingHub(WebSocketHub):
 
 async def test_broadcasts_the_game_updated_message_to_the_game() -> None:
     hub = RecordingHub()
-    game = Game.create(code="GAME01", seats=2)
+    game = Game(code="GAME01", seats=2)
     _, events = game.join("Ana")
 
     await WebSocketGameNotifier(hub).notify(game, events)

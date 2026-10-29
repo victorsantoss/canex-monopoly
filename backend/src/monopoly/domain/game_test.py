@@ -42,7 +42,7 @@ BOARD = Board(
 
 
 def new_game(seats: int = 2, starting_money: int = 1000, salary: int = 200) -> Game:
-    game = Game.create(
+    game = Game(
         code="ABCDEF",
         seats=seats,
         board=BOARD,
@@ -54,7 +54,7 @@ def new_game(seats: int = 2, starting_money: int = 1000, salary: int = 200) -> G
 
 
 def test_create_returns_a_waiting_game_without_players() -> None:
-    game = Game.create(code="ABCDEF", seats=3)
+    game = Game(code="ABCDEF", seats=3)
 
     assert game.code == "ABCDEF"
     assert game.seats == 3
@@ -68,7 +68,7 @@ def test_create_returns_a_waiting_game_without_players() -> None:
 @pytest.mark.parametrize("seats", [1, 5])
 def test_create_rejects_seat_count_outside_rules(seats: int) -> None:
     with pytest.raises(InvalidSeatCountError):
-        Game.create(code="ABCDEF", seats=seats)
+        Game(code="ABCDEF", seats=seats)
 
 
 @pytest.mark.parametrize("seats", [1, 99])
@@ -92,7 +92,7 @@ def test_players_obtained_from_the_game_cannot_be_mutated() -> None:
 
 
 def test_name_length_limit_comes_from_the_rules() -> None:
-    game = Game.create(code="ABCDEF", seats=2, rules=GameRules(max_player_name_length=3))
+    game = Game(code="ABCDEF", seats=2, rules=GameRules(max_player_name_length=3))
 
     game.join("Ana")
     with pytest.raises(InvalidPlayerNameError):
@@ -101,11 +101,11 @@ def test_name_length_limit_comes_from_the_rules() -> None:
 
 def test_domain_errors_share_a_base_class() -> None:
     with pytest.raises(GameError):
-        Game.create(code="ABCDEF", seats=9)
+        Game(code="ABCDEF", seats=9)
 
 
 def test_join_assigns_ids_in_order_with_starting_money() -> None:
-    game = Game.create(code="ABCDEF", seats=3, rules=GameRules(starting_money=700))
+    game = Game(code="ABCDEF", seats=3, rules=GameRules(starting_money=700))
 
     ana, ana_events = game.join("Ana")
     bob, _ = game.join("Bob")
@@ -124,7 +124,7 @@ def test_join_assigns_ids_in_order_with_starting_money() -> None:
 
 
 def test_join_trims_the_name() -> None:
-    game = Game.create(code="ABCDEF", seats=2)
+    game = Game(code="ABCDEF", seats=2)
 
     player, _ = game.join("  Ana  ")
 
@@ -133,14 +133,14 @@ def test_join_trims_the_name() -> None:
 
 @pytest.mark.parametrize("name", ["", "   ", "x" * 21])
 def test_join_rejects_invalid_names(name: str) -> None:
-    game = Game.create(code="ABCDEF", seats=2)
+    game = Game(code="ABCDEF", seats=2)
 
     with pytest.raises(InvalidPlayerNameError):
         game.join(name)
 
 
 def test_join_accepts_a_twenty_character_name() -> None:
-    game = Game.create(code="ABCDEF", seats=2)
+    game = Game(code="ABCDEF", seats=2)
 
     player, _ = game.join("x" * 20)
 
@@ -148,7 +148,7 @@ def test_join_accepts_a_twenty_character_name() -> None:
 
 
 def test_taking_the_last_seat_starts_the_game_with_the_first_player_active() -> None:
-    game = Game.create(code="ABCDEF", seats=2)
+    game = Game(code="ABCDEF", seats=2)
     game.join("Ana")
 
     _, events = game.join("Bob")
@@ -175,7 +175,7 @@ def test_player_lookup_raises_for_unknown_ids() -> None:
 
 
 def test_play_turn_before_start_is_rejected() -> None:
-    game = Game.create(code="ABCDEF", seats=2)
+    game = Game(code="ABCDEF", seats=2)
     game.join("Ana")
 
     with pytest.raises(GameNotInProgressError):
