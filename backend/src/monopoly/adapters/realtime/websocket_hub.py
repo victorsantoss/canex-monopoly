@@ -4,8 +4,6 @@ from fastapi import WebSocket
 
 
 class WebSocketHub:
-    """Keeps the open WebSockets of each game in memory and pushes messages to them."""
-
     def __init__(self) -> None:
         self._sockets_by_game: dict[str, set[WebSocket]] = {}
 
@@ -27,9 +25,5 @@ class WebSocketHub:
             try:
                 await websocket.send_json(message)
             except Exception:
-                # A dead socket must not cost the other players their update; the client
-                # gets the full state again when it reconnects.
+                # A dead socket must not cost the others their update; it resyncs on reconnect.
                 self.disconnect(code, websocket)
-
-    def connection_count(self, code: str) -> int:
-        return len(self._sockets_by_game.get(code, ()))

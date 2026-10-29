@@ -14,10 +14,8 @@ def create_websocket_router(hub: WebSocketHub, snapshot_provider: SnapshotProvid
 
     @router.websocket("/ws/games/{code}")
     async def game_updates(websocket: WebSocket, code: str) -> None:
-        # Registering before reading the snapshot means no update can slip in between the two;
-        # at worst a client sees an update before an equally fresh snapshot, which is harmless
-        # since both carry the full state. Accepting before closing also matters: a close during
-        # the handshake reaches browsers as a failed connection and the 4404 code is lost.
+        # Register before reading the snapshot so no update slips in between; accept before closing,
+        # or browsers see a failed handshake instead of the 4404 code.
         await hub.connect(code, websocket)
         try:
             snapshot = await snapshot_provider(code)
@@ -25,8 +23,7 @@ def create_websocket_router(hub: WebSocketHub, snapshot_provider: SnapshotProvid
                 await websocket.close(code=UNKNOWN_GAME_CLOSE_CODE)
                 return
             await websocket.send_json(snapshot)
-            # The channel is server to client only: client messages are read and ignored,
-            # just to notice the disconnection.
+            # Server-to-client only: client messages are read just to notice the disconnection.
             while True:
                 message = await websocket.receive()
                 if message["type"] == "websocket.disconnect":
