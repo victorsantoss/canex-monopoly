@@ -107,4 +107,14 @@ See [spec §3](docs/spec.md#3-decisions-on-ambiguities) for the full list and ra
   private "resume" link carrying the token, or accounts.
 - **Abuse protection:** rate limiting on joins (codes are brute-forceable), game expiry.
 - **Optional accounts** to reconnect from another device (today a closed tab loses its seat).
-<!-- more items at the end of the timebox -->
+- **Official rules kept out of scope on purpose** (the statement does not evaluate them), with
+  the extension already designed:
+  - *Jail* ([#16](https://github.com/victorsantoss/canex-monopoly/issues/16)): new square types in
+    the `Square` union, one branch in `Game._resolve_square`, a `turns_in_jail` counter on the player.
+  - *Houses and hotels* ([#17](https://github.com/victorsantoss/canex-monopoly/issues/17)): turns
+    stop being fully automatic: a `TurnPhase` and new `build` / `end_turn` commands on the
+    aggregate, a rent table per development level.
+- **A round limit** (richest player wins) as an opt-in setting, for the few long 4-player games.
+  Not done by default: it changes the win condition of the statement.
+- **End-to-end browser tests** (Playwright) for the create, join, play and win flow; today it is
+  covered by HTTP/WebSocket acceptance tests plus a manual run.
