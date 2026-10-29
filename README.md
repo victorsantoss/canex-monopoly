@@ -64,10 +64,11 @@ Spec first, then acceptance tests, then unit tests per layer (ATDD + TDD):
 
 ```
 backend/src/monopoly/
-  domain/        pure game rules: Game aggregate, board, players, events, errors
+  domain/        pure game rules: Game aggregate, board, rules (economy), players, events, errors
   application/   use cases + ports (GameRepository, GameNotifier, Dice, ...)
   adapters/      FastAPI routes (driving), in-memory repository, random dice, WebSocket hub (driven)
   main.py        composition root
+backend/scripts/ simulate_games.py: plays thousands of games to check the economy
 frontend/src/
   api/           contract types, HTTP client, WebSocket hook
   session/       per-tab player token
@@ -90,11 +91,26 @@ frontend/src/
 
 See [spec §3](docs/spec.md#3-decisions-on-ambiguities) for the full list and rationale.
 
-- One six-sided die; 16-square board; start with 1500; salary 200 when passing **or** landing on Start.
+- One six-sided die; 16-square board; salary when passing **or** landing on Start.
+- Economy defaults: start with 1000, salary 50, rent equal to the price. The creator can change
+  all three (within bounds) when creating a game.
 - Buying is automatic; if you cannot afford it, nothing happens (buying never bankrupts you).
 - Cannot pay the full rent → the owner gets what you have left, you are eliminated, your
   properties return to the bank.
 - The game starts as soon as all seats are taken; turn order is join order.
+
+## What playing it taught me
+
+The first economy (start 1500, salary 200, rent 50% of the price) passed every rule test, yet a
+full game never ended: rent only moves money between players while the salary keeps creating it.
+Playing whole games through the domain showed it (`backend/scripts/simulate_games.py`):
+
+| start / salary / rent | 2 players | 3 players | 4 players |
+|---|---|---|---|
+| 1500 / 200 / 50% (first version) | 3% finish within 1000 turns | 0% | 0% |
+| 1000 / 50 / 100% (current default) | 100%, median 27 turns | 96%, median 59 | 91%, median 121 |
+
+Unit tests check each rule; only a simulation checks that the rules together make a game.
 
 ## With more time
 
