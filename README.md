@@ -50,6 +50,8 @@ npm test
 npm run typecheck
 npm run lint
 npm run build
+npx playwright install chromium   # once
+npm run test:e2e       # two browsers play a full game; starts both servers if not running
 ```
 
 ## How the work was organised
@@ -139,5 +141,3 @@ Unit tests check each rule; only a simulation checks that the rules together mak
     aggregate, a rent table per development level.
 - **A round limit** (richest player wins) as an opt-in setting, for the few long 4-player games.
   Not done by default: it changes the win condition of the statement.
-- **End-to-end browser tests** (Playwright) for the create, join, play and win flow; today it is
-  covered by HTTP/WebSocket acceptance tests plus a manual run.
