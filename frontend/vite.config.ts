@@ -1,6 +1,6 @@
-/// <reference types="vitest/config" />
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { configDefaults } from 'vitest/config'
 
 const backendUrl = 'http://localhost:8000'
 
@@ -17,5 +17,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    // Browser tests run under Playwright, not Vitest.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
   },
 })
