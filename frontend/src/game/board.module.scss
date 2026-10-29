@@ -1,0 +1,48 @@
+.board {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.square {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 5.5rem;
+  padding: 4px;
+  border: 1px solid #b7b0a2;
+  border-top: 6px solid transparent;
+  background: #fffdf8;
+  font-size: 0.75rem;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.prices {
+  color: #57606a;
+}
+
+.tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: auto;
+}
+
+.token {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 700;
+}
+
+.active {
+  outline: 3px solid #1f2328;
+}
