@@ -81,6 +81,15 @@ describe('GamePage', () => {
     expect(screen.getByRole('button', { name: 'Roll the die' })).toBeDisabled()
   })
 
+  it('shows the game settings', () => {
+    savePlayerSession('K7Q2XA', { playerId: 'p1', playerToken: 'secret' })
+    renderGamePage()
+
+    pushState(makeState({ settings: { starting_money: 2500, salary: 120, rent_percent: 50 } }))
+
+    expect(screen.getByText('Start 2500 · Salary 120 · Rent 50% of price')).toBeInTheDocument()
+  })
+
   it('announces the winner', () => {
     savePlayerSession('K7Q2XA', { playerId: 'p1', playerToken: 'secret' })
     renderGamePage()
