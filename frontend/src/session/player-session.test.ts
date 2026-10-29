@@ -1,4 +1,4 @@
-import { loadPlayerSession, savePlayerSession } from './player-session'
+import { clearPlayerSession, loadPlayerSession, savePlayerSession } from './player-session'
 
 describe('player session', () => {
   beforeEach(() => {
@@ -15,6 +15,16 @@ describe('player session', () => {
     savePlayerSession('ABCDEF', { playerId: 'p2', playerToken: 'secret-2' })
 
     expect(loadPlayerSession('K7Q2XA')).toEqual({ playerId: 'p1', playerToken: 'secret-1' })
+    expect(loadPlayerSession('ABCDEF')).toEqual({ playerId: 'p2', playerToken: 'secret-2' })
+  })
+
+  it('forgets the seat of one game only', () => {
+    savePlayerSession('K7Q2XA', { playerId: 'p1', playerToken: 'secret-1' })
+    savePlayerSession('ABCDEF', { playerId: 'p2', playerToken: 'secret-2' })
+
+    clearPlayerSession('K7Q2XA')
+
+    expect(loadPlayerSession('K7Q2XA')).toBeNull()
     expect(loadPlayerSession('ABCDEF')).toEqual({ playerId: 'p2', playerToken: 'secret-2' })
   })
 
@@ -38,7 +48,12 @@ describe('player session', () => {
       throw new Error('blocked')
     })
 
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+      throw new Error('blocked')
+    })
+
     expect(() => savePlayerSession('K7Q2XA', { playerId: 'p1', playerToken: 't' })).not.toThrow()
+    expect(() => clearPlayerSession('K7Q2XA')).not.toThrow()
     expect(loadPlayerSession('K7Q2XA')).toBeNull()
   })
 })

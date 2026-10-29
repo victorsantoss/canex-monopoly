@@ -3,7 +3,13 @@ import { Navigate, useParams } from 'react-router-dom'
 import type { JoinedGame } from '../api/types'
 import { GameScreen } from '../game/game-screen'
 import { JoinGameForm } from '../lobby/join-game-form'
-import { loadPlayerSession, savePlayerSession, type PlayerSession } from '../session/player-session'
+import {
+  clearPlayerSession,
+  loadPlayerSession,
+  savePlayerSession,
+  type PlayerSession,
+} from '../session/player-session'
+import { parseResumeFragment } from '../session/resume-link'
 
 export function GamePage() {
   const { code } = useParams()
@@ -12,13 +18,30 @@ export function GamePage() {
   return <GameForCode key={code} code={code.toUpperCase()} />
 }
 
+// A resume link carries the seat in the fragment; it is stored like any other seat and removed from
+// the address bar at once, so the token does not linger in history or get copied along with the URL.
+function adoptSeatFromFragment(code: string): void {
+  const seat = parseResumeFragment(window.location.hash)
+  if (seat === null) return
+  savePlayerSession(code, seat)
+  window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search)
+}
+
 function GameForCode({ code }: { code: string }) {
-  const [session, setSession] = useState<PlayerSession | null>(() => loadPlayerSession(code))
+  const [session, setSession] = useState<PlayerSession | null>(() => {
+    adoptSeatFromFragment(code)
+    return loadPlayerSession(code)
+  })
 
   const takeSeat = (joined: JoinedGame): void => {
     const newSession = { playerId: joined.player_id, playerToken: joined.player_token }
     savePlayerSession(joined.code, newSession)
     setSession(newSession)
+  }
+
+  const leaveSeat = (): void => {
+    clearPlayerSession(code)
+    setSession(null)
   }
 
   if (session === null) {
@@ -29,5 +52,5 @@ function GameForCode({ code }: { code: string }) {
     )
   }
 
-  return <GameScreen code={code} session={session} />
+  return <GameScreen code={code} session={session} onSeatRejected={leaveSeat} />
 }
